@@ -15,26 +15,27 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @GetMapping("/profile/{id}")
-    public ResponseEntity<StudentProfileDTO> getProfile(@PathVariable Long id) {
-        return ResponseEntity.ok(studentService.getProfile(id));
+    // ✅ Get logged-in student's profile using JWT
+    @GetMapping("/profile")
+    public ResponseEntity<StudentProfileDTO> getLoggedInStudentProfile() {
+        return ResponseEntity.ok(studentService.getProfileForLoggedInUser());
     }
 
-    @PutMapping("/profile/{id}")
-    public ResponseEntity<String> updateProfile(@PathVariable Long id,
-                                                @RequestBody StudentProfileDTO dto) {
-        return ResponseEntity.ok(studentService.updateProfile(id, dto));
+    // ✅ Update profile using JWT — no ID in URL
+    @PutMapping("/profile")
+    public ResponseEntity<String> updateProfile(@RequestBody StudentProfileDTO dto) {
+        return ResponseEntity.ok(studentService.updateProfileForLoggedInUser(dto));
     }
 
-    @PostMapping("/resume/{id}")
-    public ResponseEntity<String> uploadResume(@PathVariable Long id,
-                                               @RequestParam("file") MultipartFile file) throws Exception {
-        return ResponseEntity.ok(studentService.uploadResume(id, file));
+    // ✅ Upload resume (logged-in user only)
+    @PostMapping("/resume")
+    public ResponseEntity<String> uploadResume(@RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(studentService.uploadResumeForLoggedInUser(file));
     }
 
-    @PostMapping("/profile-picture/{id}")
-    public ResponseEntity<String> uploadProfilePicture(@PathVariable Long id,
-                                                       @RequestParam("file") MultipartFile file) throws Exception {
-        return ResponseEntity.ok(studentService.uploadProfilePicture(id, file));
+    // ✅ Upload profile picture (logged-in user only)
+    @PostMapping("/profile-picture")
+    public ResponseEntity<String> uploadProfilePicture(@RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(studentService.uploadProfilePictureForLoggedInUser(file));
     }
 }

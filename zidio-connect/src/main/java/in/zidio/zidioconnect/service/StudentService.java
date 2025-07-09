@@ -4,11 +4,11 @@ import in.zidio.zidioconnect.dto.StudentProfileDTO;
 import in.zidio.zidioconnect.model.Student;
 import in.zidio.zidioconnect.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -16,8 +16,17 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepo;
 
-    public StudentProfileDTO getProfile(Long studentId) {
-        Student s = studentRepo.findById(studentId).orElseThrow();
+    // ✅ Utility to fetch the logged-in student
+    public Student getLoggedInStudent() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return studentRepo.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found for email: " + email));
+    }
+
+    // ✅ Get student profile for logged-in user
+    public StudentProfileDTO getProfileForLoggedInUser() {
+        Student s = getLoggedInStudent();
 
         StudentProfileDTO dto = new StudentProfileDTO();
         dto.setName(s.getName());
@@ -32,8 +41,9 @@ public class StudentService {
         return dto;
     }
 
-    public String updateProfile(Long studentId, StudentProfileDTO dto) {
-        Student s = studentRepo.findById(studentId).orElseThrow();
+    // ✅ Update profile for logged-in user
+    public String updateProfileForLoggedInUser(StudentProfileDTO dto) {
+        Student s = getLoggedInStudent();
 
         s.setName(dto.getName());
         s.setPhone(dto.getPhone());
@@ -45,10 +55,11 @@ public class StudentService {
         return "Profile updated successfully";
     }
 
-    public String uploadResume(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentRepo.findById(studentId).orElseThrow();
+    // ✅ Upload resume for logged-in user
+    public String uploadResumeForLoggedInUser(MultipartFile file) throws IOException {
+        Student student = getLoggedInStudent();
 
-        // For demo: use file name. Replace with Cloudinary/file path logic as needed
+        // Replace this with cloud/local file system upload as needed
         String fileUrl = "/uploads/resumes/" + file.getOriginalFilename();
 
         student.setResumeUrl(fileUrl);
@@ -57,9 +68,11 @@ public class StudentService {
         return "Resume uploaded";
     }
 
-    public String uploadProfilePicture(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentRepo.findById(studentId).orElseThrow();
+    // ✅ Upload profile picture for logged-in user
+    public String uploadProfilePictureForLoggedInUser(MultipartFile file) throws IOException {
+        Student student = getLoggedInStudent();
 
+        // Replace this with actual upload logic
         String imageUrl = "/uploads/images/" + file.getOriginalFilename();
 
         student.setProfilePictureUrl(imageUrl);
