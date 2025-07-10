@@ -1,7 +1,11 @@
 package in.zidio.zidioconnect.service;
 
-import in.zidio.zidioconnect.model.*;
-import in.zidio.zidioconnect.repository.*;
+import in.zidio.zidioconnect.model.Application;
+import in.zidio.zidioconnect.model.Job;
+import in.zidio.zidioconnect.model.Student;
+import in.zidio.zidioconnect.repository.ApplicationRepository;
+import in.zidio.zidioconnect.repository.JobRepository;
+import in.zidio.zidioconnect.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,38 +15,38 @@ import java.util.List;
 public class ApplicationService {
 
     @Autowired
-    private ApplicationRepository applicationRepo;
-
-    @Autowired
-    private JobRepository jobRepo;
+    private ApplicationRepository appRepo;
 
     @Autowired
     private StudentRepository studentRepo;
 
-    public Application applyToJob(Long studentId, Long jobId) {
-        Student student = studentRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+    @Autowired
+    private JobRepository jobRepo;
 
-        Job job = jobRepo.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+    public String applyToJob(Long studentId, Long jobId) {
+        Student student = studentRepo.findById(studentId).orElseThrow();
+        Job job = jobRepo.findById(jobId).orElseThrow();
+
+        if (appRepo.existsByStudentAndJob(student, job)) {
+            return "Already applied to this job";
+        }
 
         Application app = new Application();
         app.setStudent(student);
         app.setJob(job);
         app.setStatus(Application.Status.APPLIED);
+        appRepo.save(app);
 
-        return applicationRepo.save(app);
+        return "Application submitted";
     }
 
     public List<Application> getApplicationsByStudent(Long studentId) {
-        Student student = studentRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-        return applicationRepo.findByStudent(student);
+        Student student = studentRepo.findById(studentId).orElseThrow();
+        return appRepo.findByStudent(student);
     }
 
     public List<Application> getApplicationsByJob(Long jobId) {
-        Job job = jobRepo.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
-        return applicationRepo.findByJob(job);
+        Job job = jobRepo.findById(jobId).orElseThrow();
+        return appRepo.findByJob(job);
     }
 }

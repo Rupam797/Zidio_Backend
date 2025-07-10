@@ -33,11 +33,19 @@ public class JobService {
         }).collect(Collectors.toList());
     }
 
-    public Job postJob(Job job, Long recruiterId) {
-        Recruiter recruiter = recruiterRepo.findById(recruiterId)
-                .orElseThrow(() -> new RuntimeException("Recruiter not found"));
+    public Job postJob(Job job, String email) {
+        Recruiter recruiter = recruiterRepo.findByUserEmail(email);
+        if (recruiter == null) throw new RuntimeException("Recruiter not found");
 
         job.setRecruiter(recruiter);
+        job.setActive(true);
         return jobRepo.save(job);
+    }
+
+    public List<Job> getJobsByRecruiter(String email) {
+        Recruiter recruiter = recruiterRepo.findByUserEmail(email);
+        if (recruiter == null) throw new RuntimeException("Recruiter not found");
+
+        return jobRepo.findByRecruiter(recruiter);
     }
 }

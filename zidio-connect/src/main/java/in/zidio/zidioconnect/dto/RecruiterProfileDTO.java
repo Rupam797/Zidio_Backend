@@ -1,34 +1,17 @@
-package in.zidio.zidioconnect.model;
+package in.zidio.zidioconnect.dto;
 
-import jakarta.persistence.*;
+public class RecruiterProfileDTO {
 
-@Entity
-@Table(name = "recruiters")
-public class Recruiter {
-
-    @Id
-    private Long id;
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")
-    private User user;
-
+    private String email;
     private String companyName;
-
     private String companyWebsite;
-
-    private String profilePictureUrl; // ✅ Add this field
+    private String profilePictureUrl;
 
     // Getters and Setters
 
-    public Long getId() { return id; }
+    public String getEmail() { return email; }
 
-    public void setId(Long id) { this.id = id; }
-
-    public User getUser() { return user; }
-
-    public void setUser(User user) { this.user = user; }
+    public void setEmail(String email) { this.email = email; }
 
     public String getCompanyName() { return companyName; }
 
