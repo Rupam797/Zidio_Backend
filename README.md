@@ -60,12 +60,44 @@ cd zidio-connect-backend
 Update your `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/zidioconnect
-spring.datasource.username=root
-spring.datasource.password=your_password
+# =========================
+# Server Configuration
+# =========================
+server.port=8080
+
+# =========================
+# Database Configuration (MySQL)
+# =========================
+spring.datasource.url=jdbc:mysql://localhost:3306/zidio_connect
+spring.datasource.username=your_mysql_username
+spring.datasource.password=your_mysql_password
 
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# =========================
+# JWT Configuration
+# =========================
+jwt.secret=your_jwt_secret
+jwt.expirationMs=86400000
+
+# =========================
+# Mail Configuration (Gmail SMTP)
+# =========================
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_email_app_password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# =========================
+# Cloudinary Configuration
+# =========================
+cloudinary.cloud_name=your_cloudinary_cloud_name
+cloudinary.api_key=your_cloudinary_api_key
+cloudinary.api_secret=your_cloudinary_api_secret
+
 ```
 
 3. **Run the app**
@@ -81,15 +113,17 @@ App will start at: `http://localhost:8080`
 ## 📁 Project Structure
 
 ```
-zidio-connect-backend/
-├── controller/
-├── service/
-├── dto/
-├── entity/
-├── repository/
-├── security/
-├── utils/
+in.zidio.zidioconnect
+├── config         // Configuration classes (e.g., security, CORS, etc.)
+├── controller     // REST controllers (Student, Recruiter, Admin, Auth)
+├── dto            // Data Transfer Objects
+├── model          // Entity classes (User, Job, Application, etc.)
+├── repository     // Spring Data JPA Repositories
+├── security       // JWT, filters, auth handlers
+├── service        // Service logic
+├── util           // Helpers (e.g. cloudinaryfileuploder)
 └── ZidioConnectApplication.java
+
 ```
 
 ---
@@ -131,9 +165,8 @@ You can test all endpoints using:
 
 ## 📬 Contact
 
-**Developer:** Rupam Giri  
-📧 Email: [rupam@example.com]  
-🌐 LinkedIn: [linkedin.com/in/your-profile](https://linkedin.com/in/your-profile)
+**Developer:** Rupam Giri   
+🌐 LinkedIn: [linkedin.com/in/your-profile](https://www.linkedin.com/in/-rupam-giri/)
 
 ---
 
