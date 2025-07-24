@@ -166,7 +166,7 @@ You can test all endpoints using:
 ## 📬 Contact
 
 **Developer:** Rupam Giri   
-🌐 LinkedIn: [linkedin.com/in/your-profile](https://www.linkedin.com/in/-rupam-giri/)
+🌐 LinkedIn: [linkedin.com/in/rupamgiri](https://www.linkedin.com/in/-rupam-giri/)
 
 ---
 
