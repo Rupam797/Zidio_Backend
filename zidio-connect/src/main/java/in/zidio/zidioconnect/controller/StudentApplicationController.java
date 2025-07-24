@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -16,13 +17,17 @@ public class StudentApplicationController {
     @Autowired
     private ApplicationService appService;
 
-    @PostMapping("/apply/{studentId}/{jobId}")
-    public ResponseEntity<String> applyToJob(@PathVariable Long studentId, @PathVariable Long jobId) {
-        return ResponseEntity.ok(appService.applyToJob(studentId, jobId));
+    // ✅ Apply to a job using JWT (email from token)
+    @PostMapping("/apply/{jobId}")
+    public ResponseEntity<String> applyToJob(@PathVariable Long jobId, Principal principal) {
+        String email = principal.getName(); // email from JWT
+        return ResponseEntity.ok(appService.applyToJobByEmail(email, jobId));
     }
 
-    @GetMapping("/applications/{studentId}")
-    public ResponseEntity<List<Application>> getApplications(@PathVariable Long studentId) {
-        return ResponseEntity.ok(appService.getApplicationsByStudent(studentId));
+    // ✅ Get all job applications for the logged-in student
+    @GetMapping("/applications")
+    public ResponseEntity<List<Application>> getApplications(Principal principal) {
+        String email = principal.getName(); // get email from token
+        return ResponseEntity.ok(appService.getApplicationsByEmail(email));
     }
 }
