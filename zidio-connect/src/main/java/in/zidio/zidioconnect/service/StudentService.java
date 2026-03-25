@@ -3,6 +3,7 @@ package in.zidio.zidioconnect.service;
 import in.zidio.zidioconnect.dto.StudentProfileDTO;
 import in.zidio.zidioconnect.model.Student;
 import in.zidio.zidioconnect.repository.StudentRepository;
+import in.zidio.zidioconnect.util.CloudinaryFileUploader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class StudentService {
 
     @Autowired
     private StudentRepository studentRepo;
+
+    @Autowired
+    private CloudinaryFileUploader cloudinaryFileUploader;
 
     // ✅ Utility to fetch the logged-in student
     public Student getLoggedInStudent() {
@@ -55,29 +59,25 @@ public class StudentService {
         return "Profile updated successfully";
     }
 
-    // ✅ Upload resume for logged-in user
+    // ✅ Upload resume to Cloudinary
     public String uploadResumeForLoggedInUser(MultipartFile file) throws IOException {
         Student student = getLoggedInStudent();
 
-        // Replace this with cloud/local file system upload as needed
-        String fileUrl = "/uploads/resumes/" + file.getOriginalFilename();
-
+        String fileUrl = cloudinaryFileUploader.upload(file);
         student.setResumeUrl(fileUrl);
         studentRepo.save(student);
 
-        return "Resume uploaded";
+        return "Resume uploaded to Cloudinary";
     }
 
-    // ✅ Upload profile picture for logged-in user
+    // ✅ Upload profile picture to Cloudinary
     public String uploadProfilePictureForLoggedInUser(MultipartFile file) throws IOException {
         Student student = getLoggedInStudent();
 
-        // Replace this with actual upload logic
-        String imageUrl = "/uploads/images/" + file.getOriginalFilename();
-
+        String imageUrl = cloudinaryFileUploader.upload(file);
         student.setProfilePictureUrl(imageUrl);
         studentRepo.save(student);
 
-        return "Profile picture uploaded";
+        return "Profile picture uploaded to Cloudinary";
     }
 }

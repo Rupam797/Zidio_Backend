@@ -28,7 +28,15 @@ public class RecruiterProfileController {
     }
 
     @PostMapping("/profile-picture")
-    public ResponseEntity<String> uploadProfilePicture(@RequestParam("file") MultipartFile file, Principal principal) throws Exception {
-        return ResponseEntity.ok(recruiterService.uploadProfilePicture(principal.getName(), file));
+    public ResponseEntity<String> uploadProfilePicture(
+            @RequestParam("file") MultipartFile file,
+            Principal principal
+    ) {
+        try {
+            String message = recruiterService.uploadProfilePicture(principal.getName(), file);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to upload image: " + e.getMessage());
+        }
     }
 }

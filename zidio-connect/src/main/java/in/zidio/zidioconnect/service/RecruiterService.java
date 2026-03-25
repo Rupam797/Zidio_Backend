@@ -3,6 +3,7 @@ package in.zidio.zidioconnect.service;
 import in.zidio.zidioconnect.dto.RecruiterProfileDTO;
 import in.zidio.zidioconnect.model.Recruiter;
 import in.zidio.zidioconnect.repository.RecruiterRepository;
+import in.zidio.zidioconnect.util.CloudinaryFileUploader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,9 @@ public class RecruiterService {
 
     @Autowired
     private RecruiterRepository recruiterRepo;
+
+    @Autowired
+    private CloudinaryFileUploader cloudinaryFileUploader;
 
     public RecruiterProfileDTO getProfile(String email) {
         Recruiter recruiter = recruiterRepo.findByUserEmail(email);
@@ -36,9 +40,12 @@ public class RecruiterService {
 
     public String uploadProfilePicture(String email, MultipartFile file) throws IOException {
         Recruiter recruiter = recruiterRepo.findByUserEmail(email);
-        String imageUrl = "/uploads/recruiter-profiles/" + file.getOriginalFilename();
+
+        // ✅ Upload to Cloudinary
+        String imageUrl = cloudinaryFileUploader.upload(file);
+
         recruiter.setProfilePictureUrl(imageUrl);
         recruiterRepo.save(recruiter);
-        return "Profile picture uploaded";
+        return "Profile picture uploaded successfully";
     }
 }
