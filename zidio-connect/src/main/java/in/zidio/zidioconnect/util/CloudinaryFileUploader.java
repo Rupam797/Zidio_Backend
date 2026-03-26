@@ -15,9 +15,10 @@ public class CloudinaryFileUploader {
     @Autowired
     private Cloudinary cloudinary;
 
+    @SuppressWarnings("unchecked")
     public String upload(MultipartFile file) {
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
+            Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap("resource_type", "auto"));
             return uploadResult.get("secure_url").toString();
         } catch (IOException e) {

@@ -1,7 +1,6 @@
 package in.zidio.zidioconnect.model;
 
 import jakarta.persistence.*;
-
 import java.util.Date;
 
 @Entity
@@ -23,55 +22,48 @@ public class Application {
     @Enumerated(EnumType.STRING)
     private Status status = Status.APPLIED;
 
+    @Column(length = 2000)
+    private String coverLetter;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "applied_at")
     private Date appliedAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     public enum Status {
         APPLIED,
         SHORTLISTED,
-        REJECTED
+        REJECTED,
+        WITHDRAWN
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Date();
     }
 
     // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public Student getStudent() { return student; }
+    public void setStudent(Student student) { this.student = student; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Job getJob() { return job; }
+    public void setJob(Job job) { this.job = job; }
 
-    public Student getStudent() {
-        return student;
-    }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public void setStudent(Student student) {
-        this.student = student;
-    }
+    public String getCoverLetter() { return coverLetter; }
+    public void setCoverLetter(String coverLetter) { this.coverLetter = coverLetter; }
 
-    public Job getJob() {
-        return job;
-    }
+    public Date getAppliedAt() { return appliedAt; }
+    public void setAppliedAt(Date appliedAt) { this.appliedAt = appliedAt; }
 
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Date getAppliedAt() {
-        return appliedAt;
-    }
-
-    public void setAppliedAt(Date appliedAt) {
-        this.appliedAt = appliedAt;
-    }
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }

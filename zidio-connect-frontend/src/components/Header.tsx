@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Home, Users, Briefcase, MessageSquare, Bell, User, LogOut, ChevronDown, Moon, Sun } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Search, Home, Users, Briefcase, Bell, User, LogOut, ChevronDown, Moon, Sun, FileText } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const navigate = useNavigate();
+  const location = useLocation();
+  const role = localStorage.getItem('role');
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -23,6 +25,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('email');
     navigate('/login');
   };
 
@@ -44,15 +47,17 @@ const Header = () => {
         </div>
 
         {/* Right: Navigation Icons */}
-        <div className="flex items-center gap-6 text-gray-500 relative">
-          <HeaderOption Icon={Home} title="Home" to="/" active />
-          <HeaderOption Icon={Users} title="My Network" to="/network" />
-          <HeaderOption Icon={Briefcase} title="Jobs" to="/jobs" />
-          <HeaderOption Icon={MessageSquare} title="Messaging" to="/messages" />
-          <HeaderOption Icon={Bell} title="Notifications" to="/notifications" />
+        <div className="flex items-center gap-4 md:gap-6 text-gray-500 relative">
+          <HeaderOption Icon={Home} title="Home" to="/" active={location.pathname === '/'} />
+          <HeaderOption Icon={Users} title="My Network" to="/network" active={location.pathname === '/network'} />
+          <HeaderOption Icon={Briefcase} title="Jobs" to="/jobs" active={location.pathname === '/jobs'} />
+          {role === 'STUDENT' && (
+            <HeaderOption Icon={FileText} title="Applications" to="/applications" active={location.pathname === '/applications'} />
+          )}
+          <HeaderOption Icon={Bell} title="Notifications" to="/notifications" active={location.pathname === '/notifications'} />
           
           <button onClick={toggleTheme} className="flex flex-col items-center justify-center cursor-pointer hover:text-black dark:hover:text-white transition-colors p-2">
-            {theme === 'dark' ? <Sun className="w-5 h-5 text-gray-400 group-hover:text-white" /> : <Moon className="w-5 h-5" />}
+            {theme === 'dark' ? <Sun className="w-5 h-5 text-gray-400 hover:text-white" /> : <Moon className="w-5 h-5" />}
           </button>
           
           <div className="relative" onMouseLeave={() => setShowDropdown(false)}>
@@ -63,7 +68,10 @@ const Header = () => {
             {showDropdown && (
               <div className="absolute right-0 top-12 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-[#334155] rounded-md shadow-lg w-48 py-2 z-50 flex flex-col items-start px-2">
                  <Link to="/profile" className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#334155] rounded font-semibold transition-colors duration-200">View Profile</Link>
-                 {localStorage.getItem('role') === 'ADMIN' && (
+                 {role === 'STUDENT' && (
+                   <Link to="/applications" className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#334155] rounded font-semibold transition-colors duration-200">My Applications</Link>
+                 )}
+                 {role === 'ADMIN' && (
                     <Link to="/admin" className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#334155] rounded font-semibold transition-colors duration-200">Admin Panel</Link>
                  )}
                  <hr className="w-full border-gray-200 dark:border-[#334155] my-1" />
@@ -79,7 +87,7 @@ const Header = () => {
   );
 };
 
-const HeaderOption = ({ Icon, title, active, avatar, to }) => {
+const HeaderOption = ({ Icon, title, active, avatar, to }: any) => {
   return (
     <Link to={to || '#'} className={`flex flex-col items-center cursor-pointer hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors ${active ? 'text-black dark:text-white border-b-2 border-black dark:border-white pb-[2px]' : ''}`}>
       <Icon className="w-6 h-6 border-0" />

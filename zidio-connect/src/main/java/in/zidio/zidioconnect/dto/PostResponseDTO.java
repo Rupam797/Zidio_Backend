@@ -1,41 +1,20 @@
-package in.zidio.zidioconnect.model;
+package in.zidio.zidioconnect.dto;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "posts")
-public class Post {
+public class PostResponseDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank
-    @Size(max = 3000)
-    @Column(nullable = false, length = 3000)
     private String content;
-
     private String imageUrl;
-
-    @Column(nullable = false)
     private String authorEmail;
-
     private String authorName;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    private int likeCount = 0;
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+    private int likeCount;
+    private long commentCount;
+    private boolean likedByCurrentUser;
+    private String timeAgo;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -61,4 +40,13 @@ public class Post {
 
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+
+    public long getCommentCount() { return commentCount; }
+    public void setCommentCount(long commentCount) { this.commentCount = commentCount; }
+
+    public boolean isLikedByCurrentUser() { return likedByCurrentUser; }
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) { this.likedByCurrentUser = likedByCurrentUser; }
+
+    public String getTimeAgo() { return timeAgo; }
+    public void setTimeAgo(String timeAgo) { this.timeAgo = timeAgo; }
 }

@@ -1,42 +1,25 @@
-package in.zidio.zidioconnect.model;
+package in.zidio.zidioconnect.dto;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "jobs")
-public class Job {
+public class JobDetailResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
-
-    @Column(length = 3000)
     private String description;
-
-    private String type; // JOB or INTERNSHIP
-
+    private String type;
     private String location;
-
     private String salary;
-
     private String companyName;
-
-    @Column(length = 1000)
     private String skills;
-
     private LocalDateTime applicationDeadline;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    private boolean isActive = true;
-
-    @ManyToOne
-    @JoinColumn(name = "recruiter_id")
-    private Recruiter recruiter;
+    private LocalDateTime createdAt;
+    private boolean active;
+    private String recruiterName;
+    private boolean alreadyApplied;
+    private boolean saved;
+    private long applicantCount;
+    private String timeAgo;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -69,9 +52,21 @@ public class Job {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
-    public Recruiter getRecruiter() { return recruiter; }
-    public void setRecruiter(Recruiter recruiter) { this.recruiter = recruiter; }
+    public String getRecruiterName() { return recruiterName; }
+    public void setRecruiterName(String recruiterName) { this.recruiterName = recruiterName; }
+
+    public boolean isAlreadyApplied() { return alreadyApplied; }
+    public void setAlreadyApplied(boolean alreadyApplied) { this.alreadyApplied = alreadyApplied; }
+
+    public boolean isSaved() { return saved; }
+    public void setSaved(boolean saved) { this.saved = saved; }
+
+    public long getApplicantCount() { return applicantCount; }
+    public void setApplicantCount(long applicantCount) { this.applicantCount = applicantCount; }
+
+    public String getTimeAgo() { return timeAgo; }
+    public void setTimeAgo(String timeAgo) { this.timeAgo = timeAgo; }
 }

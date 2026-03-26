@@ -1,14 +1,17 @@
 package in.zidio.zidioconnect.controller;
 
+import in.zidio.zidioconnect.dto.CreatePostRequest;
+import in.zidio.zidioconnect.dto.PagedResponse;
+import in.zidio.zidioconnect.dto.PostResponseDTO;
 import in.zidio.zidioconnect.model.Post;
 import in.zidio.zidioconnect.service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -17,10 +20,14 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    // GET all posts (feed)
+    // GET all posts (paginated feed)
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public ResponseEntity<PagedResponse<PostResponseDTO>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(postService.getAllPostsPaged(page, size, email));
     }
 
     // GET my own posts
@@ -31,19 +38,18 @@ public class PostController {
 
     // POST create a new post
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Map<String, String> body, Principal principal) {
+    public ResponseEntity<Post> createPost(@Valid @RequestBody CreatePostRequest request, Principal principal) {
         Post post = new Post();
-        post.setContent(body.get("content"));
-        post.setImageUrl(body.get("imageUrl"));
+        post.setContent(request.getContent());
+        post.setImageUrl(request.getImageUrl());
         post.setAuthorEmail(principal.getName());
-        post.setAuthorName(body.getOrDefault("authorName", principal.getName()));
         return ResponseEntity.ok(postService.createPost(post));
     }
 
-    // PUT like a post
+    // PUT like/unlike a post
     @PutMapping("/{id}/like")
-    public ResponseEntity<Post> likePost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.likePost(id));
+    public ResponseEntity<PostResponseDTO> likePost(@PathVariable Long id, Principal principal) {
+        return ResponseEntity.ok(postService.likePost(id, principal.getName()));
     }
 
     // DELETE a post
