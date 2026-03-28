@@ -29,7 +29,7 @@ public class Job {
 
     private LocalDateTime applicationDeadline;
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private boolean isActive = true;

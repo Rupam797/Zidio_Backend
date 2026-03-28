@@ -15,10 +15,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByRecruiter(Recruiter recruiter);
 
     @Query("SELECT j FROM Job j WHERE j.isActive = true " +
-           "AND (:keyword IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-           "AND (:type IS NULL OR j.type = :type) " +
-           "AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%'))) " +
+           "AND (LOWER(COALESCE(j.title, '')) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "OR LOWER(COALESCE(j.description, '')) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:type = '' OR j.type = :type) " +
+           "AND LOWER(COALESCE(j.location, '')) LIKE LOWER(CONCAT('%', :location, '%')) " +
            "ORDER BY j.createdAt DESC")
     Page<Job> searchJobs(
         @Param("keyword") String keyword,

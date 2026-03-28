@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2 } from 'lucide-react';
 import { getAllPosts, createPost, likePost, getComments, addComment } from '../api/posts';
 
 const Feed = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const [postText, setPostText] = useState('');
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -16,149 +15,104 @@ const Feed = () => {
   const fetchPosts = async (pageNum = 0, append = false) => {
     try {
       const data = await getAllPosts(pageNum, 10);
-      // Backend returns PagedResponse<PostResponseDTO>
       const items = data.content || data;
-      if (append) {
-        setPosts(prev => [...prev, ...items]);
-      } else {
-        setPosts(items);
-      }
+      if (append) setPosts(prev => [...prev, ...items]);
+      else setPosts(items);
       setHasMore(data.last === false);
       setPage(pageNum);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); setLoadingMore(false); }
   };
 
   useEffect(() => { fetchPosts(); }, []);
-
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    fetchPosts(page + 1, true);
-  };
 
   const handlePost = async () => {
     if (!postText.trim()) return;
     setPosting(true);
     try {
       await createPost({ content: postText });
-      setPostText('');
-      setExpanded(false);
-      fetchPosts(0, false);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to create post');
-    } finally {
-      setPosting(false);
-    }
+      setPostText(''); setExpanded(false);
+      fetchPosts(0);
+    } catch (e) { console.error(e); }
+    finally { setPosting(false); }
   };
 
+  const email = localStorage.getItem('email') || '';
+  const initials = email.charAt(0).toUpperCase() || 'U';
+
   return (
-    <div className="flex flex-col gap-3">
-      {/* Create Post */}
-      <div className="card p-4">
-        <div className="flex gap-3 items-center">
-          <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg flex-shrink-0">
-            {localStorage.getItem('email')?.charAt(0).toUpperCase() || 'U'}
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Create post */}
+      <div className="card" style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div className="avatar avatar-md avatar-green" style={{ fontSize: '1rem' }}>{initials}</div>
           <button
             onClick={() => setExpanded(true)}
-            className="flex-1 rounded-full border border-gray-300 dark:border-gray-600 text-left px-4 py-2.5 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+            style={{ flex: 1, padding: '0.5rem 1rem', borderRadius: '999px', border: '1.5px solid var(--border-default)', background: 'var(--bg-page)', color: 'var(--text-muted)', textAlign: 'left', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', transition: 'border-color 0.2s', fontFamily: "'DM Sans', sans-serif" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.background = 'var(--bg-input)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-page)'; }}
           >
             Start a post…
           </button>
         </div>
 
         {expanded && (
-          <div className="mt-3 animate-fadeInUp">
-            <textarea
-              value={postText}
-              onChange={e => setPostText(e.target.value)}
-              placeholder="What do you want to talk about?"
-              className="input-field resize-none mb-3"
-              rows={4}
-              autoFocus
-              maxLength={3000}
-            />
-            <div className="flex justify-between items-center">
-              <div className="flex gap-1">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
-                  <ImageIcon className="w-4 h-4" /> Photo
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-500 hover:bg-orange-50 transition-colors">
-                  <Calendar className="w-4 h-4" /> Event
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors">
-                  <Newspaper className="w-4 h-4" /> Article
-                </button>
+          <div style={{ marginTop: '0.875rem' }} className="animate-fadeInUp">
+            <textarea value={postText} onChange={e => setPostText(e.target.value)} placeholder="What do you want to talk about?" className="input-field" rows={4} autoFocus maxLength={3000} style={{ resize: 'none', marginBottom: '0.75rem' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                {[{ Icon: ImageIcon, label: 'Photo', color: 'var(--color-info-text)' }, { Icon: Calendar, label: 'Event', color: '#f97316' }, { Icon: Newspaper, label: 'Article', color: '#ef4444' }].map(({ Icon, label, color }) => (
+                  <button key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.6rem', borderRadius: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, color, fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                    <Icon style={{ width: 15, height: 15 }} />{label}
+                  </button>
+                ))}
               </div>
-              <div className="flex gap-2 items-center">
-                <span className="text-xs text-gray-400">{postText.length}/3000</span>
-                <button onClick={() => { setExpanded(false); setPostText(''); }} className="btn-outline py-1.5 px-4 text-xs">Cancel</button>
-                <button onClick={handlePost} disabled={!postText.trim() || posting} className="btn-primary py-1.5 px-4 text-xs disabled:opacity-50">
-                   {posting ? 'Posting…' : 'Post'}
-                </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{postText.length}/3000</span>
+                <button className="btn-outline" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={() => { setExpanded(false); setPostText(''); }}>Cancel</button>
+                <button className="btn-primary" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={handlePost} disabled={!postText.trim() || posting}>{posting ? 'Posting…' : 'Post'}</button>
               </div>
             </div>
           </div>
         )}
 
         {!expanded && (
-          <div className="flex justify-around mt-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-            <PostAction Icon={ImageIcon} color="text-blue-500" label="Media" />
-            <PostAction Icon={Calendar} color="text-orange-500" label="Event" />
-            <PostAction Icon={Newspaper} color="text-red-500" label="Write article" />
+          <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '0.75rem', paddingTop: '0.625rem', borderTop: '1px solid var(--border-default)' }}>
+            {[{ Icon: ImageIcon, color: 'var(--color-info-text)', label: 'Media' }, { Icon: Calendar, color: '#f97316', label: 'Event' }, { Icon: Newspaper, color: '#ef4444', label: 'Write article' }].map(({ Icon, color, label }) => (
+              <button key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.75rem', borderRadius: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                <Icon style={{ width: 18, height: 18, color }} /><span className="hidden sm:block">{label}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Sorting */}
-      <div className="flex items-center gap-2 px-1">
-        <div className="h-px bg-gray-300 dark:bg-gray-600 flex-1" />
-        <span className="text-xs text-gray-500 whitespace-nowrap">
-          Sort by: <span className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:underline">Top</span>
-        </span>
+      {/* Sort */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0 0.25rem' }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--border-default)' }} />
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Sort by: <span style={{ fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>Top</span></span>
       </div>
 
       {/* Posts */}
       {loading ? (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="card p-4">
-              <div className="flex gap-3 mb-3">
-                <div className="skeleton w-11 h-11 rounded-full" />
-                <div className="flex-1">
-                  <div className="skeleton h-4 w-32 mb-1" />
-                  <div className="skeleton h-3 w-48" />
-                </div>
-              </div>
-              <div className="skeleton h-3 w-full mb-1" />
-              <div className="skeleton h-3 w-4/5" />
+        <>{[1, 2, 3].map(i => (
+          <div key={i} className="card" style={{ padding: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div className="skeleton" style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}><div className="skeleton" style={{ height: 13, width: '40%', marginBottom: 6 }} /><div className="skeleton" style={{ height: 11, width: '60%' }} /></div>
             </div>
-          ))}
-        </div>
+            <div className="skeleton" style={{ height: 11, width: '100%', marginBottom: 6 }} />
+            <div className="skeleton" style={{ height: 11, width: '75%' }} />
+          </div>
+        ))}</>
       ) : posts.length === 0 ? (
-        <div className="text-center text-gray-500 py-10">No posts yet. Be the first to share!</div>
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2.5rem 0', fontSize: '0.875rem' }}>No posts yet. Be the first to share!</div>
       ) : (
         <>
-          {posts.map((post, i) => (
-            <PostCard key={post.id} post={post} delay={i < 10 ? i * 0.05 : 0} onRefresh={() => fetchPosts(0)} />
-          ))}
+          {posts.map((post, i) => <PostCard key={post.id} post={post} delay={i < 10 ? i * 0.05 : 0} />)}
           {hasMore && (
-            <button
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="btn-outline w-full justify-center py-3 text-sm"
-            >
-              {loadingMore ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Loading more…
-                </span>
-              ) : 'Load More Posts'}
+            <button onClick={() => { setLoadingMore(true); fetchPosts(page + 1, true); }} disabled={loadingMore} className="btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>
+              {loadingMore ? <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Loader2 style={{ width: 15, height: 15, animation: 'spin 1s linear infinite' }} />Loading…</span> : 'Load More Posts'}
             </button>
           )}
         </>
@@ -167,159 +121,95 @@ const Feed = () => {
   );
 };
 
-const PostAction = ({ Icon, color, label }) => (
-  <button className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${color}`}>
-    <Icon className="w-5 h-5" />
-    <span className="hidden sm:block text-gray-600 dark:text-gray-400">{label}</span>
-  </button>
-);
-
-const PostCard = ({ post, delay, onRefresh }) => {
+const PostCard = ({ post, delay }: any) => {
   const [liked, setLiked] = useState(post.likedByCurrentUser || false);
   const [likesCount, setLikesCount] = useState(post.likeCount || 0);
   const [showComment, setShowComment] = useState(false);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
 
   const fetchComments = async () => {
     setLoadingComments(true);
-    try {
-      const data = await getComments(post.id);
-      setComments(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingComments(false);
-    }
+    try { setComments(await getComments(post.id)); } catch (e) { console.error(e); } finally { setLoadingComments(false); }
   };
 
-  const handleToggleComments = () => {
-    if (!showComment) fetchComments();
-    setShowComment(!showComment);
-  };
+  const handleToggleComments = () => { if (!showComment) fetchComments(); setShowComment(v => !v); };
 
   const handleLike = async () => {
-    // Optimistic toggle
     const wasLiked = liked;
-    setLiked(!wasLiked);
-    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
-    try {
-      const result = await likePost(post.id);
-      // Sync with server state
-      if (result) {
-        setLiked(result.likedByCurrentUser);
-        setLikesCount(result.likeCount);
-      }
-    } catch (e) {
-      // Revert on error
-      setLiked(wasLiked);
-      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
-      console.error(e);
-    }
+    setLiked(!wasLiked); setLikesCount((n: number) => wasLiked ? n - 1 : n + 1);
+    try { const r = await likePost(post.id); if (r) { setLiked(r.likedByCurrentUser); setLikesCount(r.likeCount); } }
+    catch { setLiked(wasLiked); setLikesCount((n: number) => wasLiked ? n + 1 : n - 1); }
   };
 
-  const handleAddComment = async (e) => {
+  const handleAddComment = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && newComment.trim()) {
-      try {
-        const c = await addComment(post.id, { content: newComment });
-        setComments([...comments, c]);
-        setCommentCount(prev => prev + 1);
-        setNewComment('');
-      } catch (e) { console.error(e); }
+      try { const c = await addComment(post.id, { content: newComment }); setComments(prev => [...prev, c]); setCommentCount((n: number) => n + 1); setNewComment(''); } catch (e) { console.error(e); }
     }
   };
 
-  const timeDisplay = post.timeAgo || new Date(post.createdAt).toLocaleDateString();
+  const email = localStorage.getItem('email') || '';
+  const myInitials = email.charAt(0).toUpperCase() || 'U';
+  const authorInitials = (post.authorName || post.authorEmail || '?').charAt(0).toUpperCase();
+  const timeDisplay = post.timeAgo || (post.createdAt ? new Date(post.createdAt).toLocaleDateString() : '');
+
+  const btnBase: React.CSSProperties = { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', padding: '0.625rem 0.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: 'transparent', fontSize: '0.85rem', fontWeight: 600, transition: 'background 0.15s, color 0.15s', fontFamily: "'DM Sans', sans-serif" };
 
   return (
-    <div className="card overflow-hidden animate-fadeInUp" style={{ animationDelay: `${delay}s` }}>
-      {/* Header */}
-      <div className="flex justify-between items-start p-4 pb-2">
-        <div className="flex gap-3">
-          <Link to="/profile">
-            <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-              {post.authorName?.charAt(0).toUpperCase() || '?'}
-            </div>
-          </Link>
+    <div className="card animate-fadeInUp" style={{ overflow: 'hidden', animationDelay: `${delay}s` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem 1rem 0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.625rem' }}>
+          <div className="avatar avatar-md avatar-blue">{authorInitials}</div>
           <div>
-            <Link to="/profile" className="font-semibold text-sm text-gray-900 dark:text-gray-100 hover:text-zidio-green hover:underline block">
-               {post.authorName || post.authorEmail}
-            </Link>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{post.authorEmail}</p>
-            <p className="text-xs text-gray-400 flex items-center gap-1">{timeDisplay} · <Globe className="w-3 h-3" /></p>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>{post.authorName || post.authorEmail}</p>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{post.authorEmail}</p>
+            <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>{timeDisplay} · <Globe style={{ width: 11, height: 11 }} /></p>
           </div>
         </div>
-        <button className="text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-full transition-colors">
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
+        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem', borderRadius: '50%', display: 'flex' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}><MoreHorizontal style={{ width: 18, height: 18 }} /></button>
       </div>
 
-      {/* Content */}
-      <div className="px-4 pb-3">
-        <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{post.content}</p>
+      <div style={{ padding: '0 1rem 0.75rem' }}>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-primary)', whiteSpace: 'pre-line', lineHeight: 1.65 }}>{post.content}</p>
       </div>
 
-      {/* Image */}
-      {post.imageUrl && (
-        <div className="border-y border-gray-100 dark:border-gray-700 max-h-[400px] overflow-hidden">
-          <img src={post.imageUrl} alt="post media" className="w-full object-cover" />
-        </div>
-      )}
+      {post.imageUrl && <div style={{ borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)', maxHeight: 400, overflow: 'hidden' }}><img src={post.imageUrl} alt="post" style={{ width: '100%', objectFit: 'cover' }} /></div>}
 
-      {/* Stats */}
-      <div className="px-4 py-2 flex justify-between text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center gap-1 cursor-pointer hover:underline">
-          <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
-            <ThumbsUp className="w-2.5 h-2.5 text-white" />
-          </div>
+      <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer' }}>
+          <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ThumbsUp style={{ width: 9, height: 9, color: '#fff' }} /></div>
           {likesCount}
         </div>
-        <span className="cursor-pointer hover:underline" onClick={handleToggleComments}>
-          {commentCount > 0 ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}` : 'Comment'}
-        </span>
+        <span style={{ cursor: 'pointer' }} onClick={handleToggleComments}>{commentCount > 0 ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}` : 'Comment'}</span>
       </div>
 
-      {/* Actions */}
-      <div className="flex px-2 py-1">
-        <ActionBtn Icon={ThumbsUp} label="Like" active={liked} onClick={handleLike} />
-        <ActionBtn Icon={MessageCircle} label="Comment" onClick={handleToggleComments} />
-        <ActionBtn Icon={Share2} label="Share" />
-        <ActionBtn Icon={Send} label="Send" />
+      <div style={{ display: 'flex', padding: '0.25rem 0.5rem' }}>
+        {[{ Icon: ThumbsUp, label: 'Like', active: liked, onClick: handleLike }, { Icon: MessageCircle, label: 'Comment', active: false, onClick: handleToggleComments }, { Icon: Share2, label: 'Share', active: false, onClick: undefined }, { Icon: Send, label: 'Send', active: false, onClick: undefined }].map(({ Icon, label, active, onClick }) => (
+          <button key={label} onClick={onClick} style={{ ...btnBase, color: active ? 'var(--brand)' : 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <Icon style={{ width: 18, height: 18, fill: active ? 'currentColor' : 'none' }} /><span className="hidden sm:block">{label}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Comment Section */}
       {showComment && (
-        <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 animate-fadeInUp">
-          <div className="flex gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center font-bold text-xs text-emerald-700 dark:text-emerald-300 flex-shrink-0">
-               {localStorage.getItem('email')?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <input 
-              className="input-field py-1.5 text-sm flex-1 bg-white dark:bg-gray-800" 
-              placeholder="Add a comment… (Press Enter)" 
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              onKeyDown={handleAddComment}
-            />
+        <div className="animate-fadeInUp" style={{ padding: '0.75rem 1rem 1rem', borderTop: '1px solid var(--border-default)', background: 'var(--bg-page)' }}>
+          <div style={{ display: 'flex', gap: '0.625rem', marginBottom: '1rem' }}>
+            <div className="avatar avatar-sm avatar-green" style={{ fontSize: '0.7rem' }}>{myInitials}</div>
+            <input className="input-field" placeholder="Add a comment… (Enter to post)" value={newComment} onChange={e => setNewComment(e.target.value)} onKeyDown={handleAddComment} style={{ flex: 1, padding: '0.5rem 0.875rem', fontSize: '0.85rem' }} />
           </div>
-          
-          {loadingComments ? (
-            <div className="text-xs text-center text-gray-400 py-2">Loading comments…</div>
-          ) : (
-            <div className="flex flex-col gap-3">
+          {loadingComments ? <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center' }}>Loading…</p> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {comments.map(c => (
-                <div key={c.id} className="flex gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center font-bold text-xs text-blue-700 dark:text-blue-300 flex-shrink-0 mt-1">
-                     {c.authorName?.charAt(0).toUpperCase() || '?'}
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 border dark:border-gray-600 text-sm text-gray-800 dark:text-gray-200 p-2 rounded-lg rounded-tl-none flex-1">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <p className="font-semibold text-xs">{c.authorName || c.authorEmail}</p>
-                      {c.timeAgo && <span className="text-xs text-gray-400">{c.timeAgo}</span>}
+                <div key={c.id} style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div className="avatar avatar-sm avatar-blue" style={{ fontSize: '0.7rem', marginTop: 2 }}>{(c.authorName || c.authorEmail || '?').charAt(0).toUpperCase()}</div>
+                  <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: '0 10px 10px 10px', padding: '0.5rem 0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.125rem' }}>
+                      <span style={{ fontSize: '0.775rem', fontWeight: 600, color: 'var(--text-primary)' }}>{c.authorName || c.authorEmail}</span>
+                      {c.timeAgo && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{c.timeAgo}</span>}
                     </div>
-                    <p>{c.content}</p>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}>{c.content}</p>
                   </div>
                 </div>
               ))}
@@ -330,13 +220,5 @@ const PostCard = ({ post, delay, onRefresh }) => {
     </div>
   );
 };
-
-const ActionBtn = ({ Icon, label, active, onClick }) => (
-  <button onClick={onClick}
-    className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${active ? 'text-zidio-green' : 'text-gray-600 dark:text-gray-400'}`}>
-    <Icon className={`w-5 h-5 ${active ? 'fill-current' : ''}`} />
-    <span className="hidden sm:block">{label}</span>
-  </button>
-);
 
 export default Feed;

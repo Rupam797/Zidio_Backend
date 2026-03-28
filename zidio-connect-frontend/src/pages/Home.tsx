@@ -4,26 +4,19 @@ import Sidebar from '../components/Sidebar';
 import Rightbar from '../components/Rightbar';
 import Feed from '../components/Feed';
 
-const Home = () => {
-  return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="max-w-[1200px] mx-auto pt-5 px-4 pb-12 flex gap-5 items-start">
-        {/* Left Sidebar */}
-        <div className="hidden lg:block w-[220px] flex-shrink-0 sticky top-[70px]">
-          <Sidebar />
-        </div>
-
-        {/* Feed */}
-        <div className="flex-1 min-w-0 max-w-[600px]">
-          <Feed />
-        </div>
-
-        {/* Right bar */}
-        <Rightbar />
-      </main>
-    </div>
-  );
-};
+const Home = () => (
+  <div style={{ minHeight: '100vh', background: 'var(--bg-page)', transition: 'background 0.3s ease' }}>
+    <Header />
+    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '1.25rem 1rem 3rem', display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+      <div className="hidden lg:block" style={{ width: 220, flexShrink: 0, position: 'sticky', top: 70 }}>
+        <Sidebar />
+      </div>
+      <div style={{ flex: 1, minWidth: 0, maxWidth: 600 }}>
+        <Feed />
+      </div>
+      <Rightbar />
+    </main>
+  </div>
+);
 
 export default Home;

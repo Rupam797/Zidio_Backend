@@ -1,80 +1,145 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/auth';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       const data = await login({ email, password });
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
+      localStorage.setItem('email', data.email);
       if (data.role === 'ADMIN') navigate('/admin');
       else navigate('/');
+      toast.success('Logged in successfully!');
     } catch {
-      setError('Invalid email or password. Please try again.');
+      toast.error('Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 30%, #f0f2f5 100%)' }}>
-      {/* Left Panel */}
-      <div className="hidden lg:flex flex-col justify-center px-16 w-1/2" style={{ background: 'linear-gradient(145deg, #059669 0%, #047857 100%)' }}>
-        <div className="mb-8">
-          <div className="text-white font-black text-5xl tracking-tight mb-1">Zidio</div>
-          <div className="text-emerald-200 font-medium text-lg">Connect</div>
-        </div>
-        <h2 className="text-white font-bold text-4xl leading-tight mb-4">
-          Your next career<br/>opportunity awaits.
-        </h2>
-        <p className="text-emerald-100 text-lg leading-relaxed max-w-sm">
-          Connect with top recruiters, showcase your skills, and land your dream job on Zidio Connect.
-        </p>
-        <div className="mt-12 flex gap-6">
-          <div className="text-center">
-            <div className="text-white font-bold text-3xl">10K+</div>
-            <div className="text-emerald-200 text-sm">Students</div>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        background: 'var(--bg-page)',
+        transition: 'background 0.3s ease',
+      }}
+    >
+      {/* ── Left Panel ── */}
+      <div
+        className="auth-left-panel hidden lg:flex flex-col justify-center"
+        style={{ width: '45%', padding: '3rem 4rem' }}
+      >
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 800,
+            fontSize: '2.25rem',
+            color: '#fff',
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            marginBottom: '0.25rem',
+          }}>
+            Zidio
           </div>
-          <div className="text-center">
-            <div className="text-white font-bold text-3xl">500+</div>
-            <div className="text-emerald-200 text-sm">Recruiters</div>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, fontSize: '1rem', marginBottom: '2.5rem' }}>
+            Connect
           </div>
-          <div className="text-center">
-            <div className="text-white font-bold text-3xl">2K+</div>
-            <div className="text-emerald-200 text-sm">Jobs Posted</div>
+
+          <h2 style={{
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: '2.25rem',
+            lineHeight: 1.2,
+            marginBottom: '1rem',
+            letterSpacing: '-0.03em',
+          }}>
+            Your next<br />opportunity<br />awaits.
+          </h2>
+
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1rem', lineHeight: 1.7, maxWidth: 340 }}>
+            Connect with top recruiters, showcase your skills, and land your dream job on Zidio Connect.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: '2.5rem', marginTop: '3rem' }}>
+            {[
+              { n: '10K+', l: 'Students' },
+              { n: '500+', l: 'Recruiters' },
+              { n: '2K+',  l: 'Jobs Posted' },
+            ].map(({ n, l }) => (
+              <div key={l} style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.75rem', letterSpacing: '-0.04em', lineHeight: 1 }}>{n}</div>
+                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', marginTop: '0.25rem' }}>{l}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md animate-fadeInUp">
-          <div className="lg:hidden mb-8 text-center">
-            <div className="text-white bg-zidio-green font-black text-3xl px-4 py-1 rounded-xl inline-block mb-2">Zidio</div>
+      {/* ── Right Panel ── */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1.5rem',
+      }}>
+        <div style={{ width: '100%', maxWidth: 420 }} className="animate-fadeInUp">
+          {/* Mobile logo */}
+          <div className="lg:hidden" style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <span style={{
+              background: 'var(--brand)',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: '1.5rem',
+              letterSpacing: '-0.04em',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '8px',
+              display: 'inline-block',
+            }}>
+              Zidio
+            </span>
           </div>
-          <div className="card p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h1>
-            <p className="text-gray-500 text-sm mb-6">Sign in to continue to Zidio Connect</p>
 
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
-                <span>⚠️</span> {error}
-              </div>
-            )}
+          <div className="auth-card">
+            <h1 style={{
+              color: 'var(--text-primary)',
+              fontWeight: 700,
+              fontSize: '1.5rem',
+              letterSpacing: '-0.03em',
+              marginBottom: '0.25rem',
+            }}>
+              Welcome back
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+              Sign in to continue to Zidio Connect
+            </p>
 
-            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.825rem',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                  marginBottom: '0.375rem',
+                }}>
+                  Email address
+                </label>
                 <input
                   className="input-field"
                   type="email"
@@ -84,38 +149,70 @@ const Login = () => {
                   required
                 />
               </div>
+
               <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-sm font-medium text-gray-700">Password</label>
-                  <a href="#" className="text-xs text-zidio-green hover:underline font-medium">Forgot password?</a>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Password
+                  </label>
+                  <a href="#" style={{ fontSize: '0.775rem', fontWeight: 600, color: 'var(--brand)' }}>
+                    Forgot password?
+                  </a>
                 </div>
-                <input
-                  className="input-field"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="input-field"
+                    type={showPw ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    style={{ paddingRight: '2.75rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(v => !v)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--text-muted)',
+                      padding: '0.125rem',
+                      display: 'flex',
+                    }}
+                  >
+                    {showPw
+                      ? <EyeOff style={{ width: 16, height: 16 }} />
+                      : <Eye style={{ width: 16, height: 16 }} />
+                    }
+                  </button>
+                </div>
               </div>
-              <button type="submit" className="btn-primary w-full justify-center py-3 mt-2" disabled={loading}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z"/></svg>
-                    Signing in…
-                  </span>
-                ) : 'Sign in'}
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={loading}
+                style={{ width: '100%', justifyContent: 'center', padding: '0.75rem', marginTop: '0.25rem' }}
+              >
+                {loading
+                  ? <><Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} /> Signing in…</>
+                  : 'Sign in'
+                }
               </button>
             </form>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200"/></div>
-              <div className="relative text-center"><span className="bg-white px-3 text-xs text-gray-400">OR</span></div>
-            </div>
+            <div className="divider-text" style={{ margin: '1.5rem 0' }}>or</div>
 
-            <p className="text-center text-sm text-gray-500">
+            <p style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
               New to Zidio?{' '}
-              <Link to="/register" className="text-zidio-green font-semibold hover:underline">Create an account</Link>
+              <Link to="/register" style={{ color: 'var(--brand)', fontWeight: 700 }}>
+                Create an account
+              </Link>
             </p>
           </div>
         </div>

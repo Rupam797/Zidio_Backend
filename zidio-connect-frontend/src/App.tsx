@@ -9,6 +9,7 @@ import Applications from './pages/Applications';
 import AdminDashboard from './pages/AdminDashboard';
 import Connections from './pages/Connections';
 import Notifications from './pages/Notifications';
+import { Toaster } from 'react-hot-toast';
 
 const RequireAuth = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -29,8 +30,10 @@ const RequireAdmin = ({ children }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <>
+      <Toaster position="top-right" />
+      <BrowserRouter>
+        <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
@@ -46,6 +49,7 @@ function App() {
         <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
       </Routes>
     </BrowserRouter>
+    </>
   );
 }
 

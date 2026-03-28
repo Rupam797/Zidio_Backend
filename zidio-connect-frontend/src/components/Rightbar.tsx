@@ -1,76 +1,210 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Circle, ChevronDown, ArrowRight, Info } from 'lucide-react';
+import { ArrowRight, Info, Newspaper, ChevronDown } from 'lucide-react';
 
 const NEWS = [
-  { title: 'Tech hiring sees a strong rebound in 2025', meta: 'Top story · 12.4k readers' },
-  { title: 'AI & ML skills dominate recruiter searches', meta: 'Top story · 9.8k readers' },
-  { title: 'Remote-first companies outperform office counterparts', meta: '1d ago · 6.2k readers' },
-  { title: 'How to ace your next technical interview', meta: '2d ago · 4.1k readers' },
-  { title: 'Open source contributions boost career prospects', meta: '3d ago · 3.5k readers' },
+  { title: 'Tech hiring sees a strong rebound in 2025',         meta: 'Top story · 12.4k readers' },
+  { title: 'AI & ML skills dominate recruiter searches',        meta: 'Top story · 9.8k readers' },
+  { title: 'Remote-first companies outperform office peers',    meta: '1d ago · 6.2k readers' },
+  { title: 'How to ace your next technical interview',          meta: '2d ago · 4.1k readers' },
+  { title: 'Open source contributions boost career prospects',  meta: '3d ago · 3.5k readers' },
 ];
 
-const SUGGESTED_PEOPLE = [
-  { id: 1, name: 'Arjun Mehta', role: 'Backend Dev @ Infosys', initials: 'AM', color: 'bg-blue-100 text-blue-700' },
-  { id: 2, name: 'Sneha Patel', role: 'UI/UX Designer @ Flipkart', initials: 'SP', color: 'bg-pink-100 text-pink-700' },
-  { id: 3, name: 'Vikram Singh', role: 'Recruiter @ Google India', initials: 'VS', color: 'bg-amber-100 text-amber-700' },
+const PEOPLE = [
+  { id: 1, name: 'Arjun Mehta',  role: 'Backend Dev @ Infosys',    initials: 'AM', color: 'avatar-blue' },
+  { id: 2, name: 'Sneha Patel',  role: 'UI/UX Designer @ Flipkart', initials: 'SP', color: 'avatar-red' },
+  { id: 3, name: 'Vikram Singh', role: 'Recruiter @ Google India',  initials: 'VS', color: 'avatar-amber' },
 ];
+
+const FOOTER_LINKS = ['About', 'Help', 'Privacy', 'Terms', 'Advertising'];
 
 const Rightbar = () => {
   return (
-    <div className="w-[300px] hidden lg:flex flex-col gap-3 flex-shrink-0">
-      {/* News Card */}
-      <div className="card p-4 sticky top-[72px]">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-sm font-bold text-gray-900">Zidio News</h2>
-          <span className="text-gray-500 bg-gray-100 rounded-full w-6 h-6 flex items-center justify-center cursor-pointer hover:bg-gray-200">
-            <Info className="w-4 h-4" />
-          </span>
+    <div style={{ width: 300, flexShrink: 0 }} className="hidden lg:flex flex-col gap-3">
+      {/* ── Zidio News ── */}
+      <div className="card" style={{ padding: '1rem', position: 'sticky', top: 72 }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.875rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+            <Newspaper style={{ width: 15, height: 15, color: 'var(--brand)' }} />
+            <h2 style={{
+              fontSize: '0.875rem',
+              fontWeight: 700,
+              color: 'var(--text-primary)',
+              margin: 0,
+            }}>
+              Zidio News
+            </h2>
+          </div>
+          <button style={{
+            width: 26,
+            height: 26,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--bg-badge)',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--text-muted)',
+            transition: 'background 0.15s',
+          }}>
+            <Info style={{ width: 13, height: 13 }} />
+          </button>
         </div>
-        <ul className="flex flex-col gap-3">
+
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {NEWS.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 cursor-pointer group">
-              <Circle className="text-emerald-500 mt-2 w-2 h-2 flex-shrink-0 fill-current" />
+            <li
+              key={i}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}
+            >
+              <div style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'var(--brand)',
+                flexShrink: 0,
+                marginTop: '0.4rem',
+              }} />
               <div>
-                <p className="text-sm font-semibold text-gray-800 group-hover:text-zidio-green group-hover:underline leading-tight">{item.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{item.meta}</p>
+                <p style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  margin: 0,
+                  lineHeight: 1.4,
+                  transition: 'color 0.15s',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--brand)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                >
+                  {item.title}
+                </p>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '0.125rem 0 0' }}>
+                  {item.meta}
+                </p>
               </div>
             </li>
           ))}
         </ul>
-        <button className="mt-4 text-sm text-gray-500 font-semibold hover:text-gray-700 flex items-center gap-1 transition-colors">
-          Show more <ChevronDown className="w-4 h-4" />
+
+        <button style={{
+          marginTop: '0.875rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.25rem',
+          fontSize: '0.8rem',
+          fontWeight: 600,
+          color: 'var(--text-secondary)',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '0.25rem 0',
+          transition: 'color 0.15s',
+          fontFamily: "'DM Sans', sans-serif",
+        }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
+        >
+          Show more <ChevronDown style={{ width: 14, height: 14 }} />
         </button>
       </div>
 
-      {/* People You May Know */}
-      <div className="card p-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-4">People You May Know</h2>
-        <div className="flex flex-col gap-4">
-          {SUGGESTED_PEOPLE.map(person => (
-            <div key={person.id} className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${person.color}`}>
-                {person.initials}
+      {/* ── People You May Know ── */}
+      <div className="card" style={{ padding: '1rem' }}>
+        <h2 style={{
+          fontSize: '0.875rem',
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          margin: '0 0 0.875rem',
+        }}>
+          People You May Know
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+          {PEOPLE.map(p => (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div className={`avatar avatar-md ${p.color}`}>{p.initials}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.825rem',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {p.name}
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {p.role}
+                </p>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{person.name}</p>
-                <p className="text-xs text-gray-500 truncate">{person.role}</p>
-              </div>
-              <button className="btn-outline py-1 px-3 text-xs flex-shrink-0">Connect</button>
+              <button className="btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', flexShrink: 0 }}>
+                Connect
+              </button>
             </div>
           ))}
         </div>
-        <Link to="/network" className="mt-4 text-sm text-zidio-green font-semibold hover:underline flex items-center justify-center gap-1">
-          View all suggestions <ArrowRight className="w-4 h-4 ml-1" />
+
+        <Link
+          to="/network"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.25rem',
+            marginTop: '1rem',
+            paddingTop: '0.875rem',
+            borderTop: '1px solid var(--border-default)',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            color: 'var(--brand)',
+            textDecoration: 'none',
+          }}
+        >
+          View all suggestions <ArrowRight style={{ width: 13, height: 13 }} />
         </Link>
       </div>
 
-      {/* Footer */}
-      <div className="px-2 text-xs text-gray-400 flex flex-wrap gap-x-2 gap-y-1">
-        {['About', 'Help', 'Privacy', 'Terms', 'Advertising'].map(item => (
-          <span key={item} className="cursor-pointer hover:underline hover:text-gray-600">{item}</span>
+      {/* ── Footer ── */}
+      <div style={{
+        padding: '0.25rem 0.5rem',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '0.25rem 0.5rem',
+      }}>
+        {FOOTER_LINKS.map(item => (
+          <span
+            key={item}
+            style={{
+              fontSize: '0.7rem',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+          >
+            {item}
+          </span>
         ))}
-        <span className="w-full mt-1">Zidio Connect © 2025</span>
+        <span style={{ width: '100%', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
+          Zidio Connect © 2025
+        </span>
       </div>
     </div>
   );

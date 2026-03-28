@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()         // Public: login, register, forgot password
                         .requestMatchers("/api/public/**").permitAll()       // Optional public job listings
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/student/jobs", "/api/student/jobs/{id}").permitAll() // Allow all roles to view jobs
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/recruiter/**").hasRole("RECRUITER")

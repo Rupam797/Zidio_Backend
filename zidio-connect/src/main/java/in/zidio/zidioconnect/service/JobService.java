@@ -41,9 +41,9 @@ public class JobService {
     public PagedResponse<JobDetailResponse> searchJobs(String keyword, String type, String location,
                                                         int page, int size, String currentUserEmail) {
         Page<Job> jobPage = jobRepo.searchJobs(
-            keyword != null && keyword.isBlank() ? null : keyword,
-            type != null && type.isBlank() ? null : type,
-            location != null && location.isBlank() ? null : location,
+            keyword == null ? "" : keyword,
+            type == null ? "" : type,
+            location == null ? "" : location,
             PageRequest.of(page, size)
         );
 

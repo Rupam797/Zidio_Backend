@@ -1,59 +1,147 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Briefcase, ClipboardList, User, Settings } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Briefcase, ClipboardList, User, Settings, Shield, TrendingUp } from 'lucide-react';
 
-const role = localStorage.getItem('role') || 'STUDENT';
+const TRENDING = [
+  { tag: '#ReactDeveloper', count: '600k' },
+  { tag: '#HiringNow',      count: '500k' },
+  { tag: '#Freshers2025',   count: '420k' },
+  { tag: '#TechJobs',       count: '360k' },
+  { tag: '#Zidio',          count: '240k' },
+];
 
 const Sidebar = () => {
+  const role = localStorage.getItem('role') || 'STUDENT';
+  const email = localStorage.getItem('email') || '';
+  const location = useLocation();
+
+  const initials = email.charAt(0).toUpperCase() || 'U';
+  const roleLabel = role === 'RECRUITER' ? 'Recruiter' : role === 'ADMIN' ? 'Administrator' : 'Student';
+
+  const quickLinks = [
+    { to: '/jobs',         icon: Briefcase,     label: 'Browse Jobs' },
+    { to: '/applications', icon: ClipboardList, label: 'My Applications' },
+    { to: '/profile',      icon: User,          label: 'Edit Profile' },
+    ...(role === 'ADMIN' ? [{ to: '/admin', icon: Shield, label: 'Admin Panel' }] : []),
+  ];
+
   return (
     <div className="flex flex-col gap-3 w-full">
-      {/* Profile Card */}
-      <div className="card overflow-hidden">
-        <div className="profile-banner h-16" />
-        <div className="flex flex-col items-center -mt-8 pb-4 px-4 text-center">
-          <div className="w-16 h-16 rounded-full border-4 border-white bg-emerald-100 flex items-center justify-center text-emerald-700 text-2xl font-bold shadow-sm">
-            U
-          </div>
-          <Link to="/profile" className="font-bold text-gray-900 mt-2 hover:text-zidio-green hover:underline text-sm">
-            Your Profile
-          </Link>
-          <p className="text-xs text-gray-500 mt-0.5">{role === 'RECRUITER' ? 'Recruiter' : role === 'ADMIN' ? 'Administrator' : 'Student'}</p>
-          <div className="w-full border-t border-gray-100 mt-4 pt-3 text-xs">
-            <div className="flex justify-between text-gray-500 hover:bg-gray-50 px-2 py-1.5 rounded cursor-pointer">
-              <span>Profile views</span>
-              <span className="text-zidio-green font-semibold">—</span>
+      {/* ── Profile Card ── */}
+      <div className="card" style={{ overflow: 'hidden' }}>
+        <div className="profile-banner" style={{ height: 64 }} />
+        <div style={{ padding: '0 1rem 1.125rem', marginTop: '-2.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Avatar */}
+            <div
+              className="avatar avatar-2xl avatar-green"
+              style={{
+                border: '3px solid var(--bg-card)',
+                boxShadow: 'var(--shadow-md)',
+                fontSize: '1.6rem',
+              }}
+            >
+              {initials}
             </div>
-            <div className="flex justify-between text-gray-500 hover:bg-gray-50 px-2 py-1.5 rounded cursor-pointer">
-              <span>Connections</span>
-              <span className="text-zidio-green font-semibold">—</span>
+
+            <Link
+              to="/profile"
+              style={{
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                color: 'var(--text-primary)',
+                marginTop: '0.5rem',
+                textDecoration: 'none',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--brand)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            >
+              {email || 'Your Profile'}
+            </Link>
+
+            <span style={{
+              fontSize: '0.75rem',
+              color: 'var(--brand)',
+              fontWeight: 600,
+              marginTop: '0.125rem',
+              background: 'var(--brand-dim)',
+              padding: '0.1rem 0.5rem',
+              borderRadius: '999px',
+            }}>
+              {roleLabel}
+            </span>
+          </div>
+
+          {/* Stats */}
+          <div style={{
+            marginTop: '0.875rem',
+            paddingTop: '0.875rem',
+            borderTop: '1px solid var(--border-default)',
+          }}>
+            <div className="sidebar-stat-row">
+              <span className="sidebar-stat-label">Profile views</span>
+              <span className="sidebar-stat-value">—</span>
+            </div>
+            <div className="sidebar-stat-row">
+              <span className="sidebar-stat-label">Connections</span>
+              <span className="sidebar-stat-value">—</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Links */}
-      <div className="card p-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Quick Links</p>
-        {[
-          { to: '/jobs', icon: <Briefcase className="w-4 h-4" />, label: 'Browse Jobs' },
-          { to: '/applications', icon: <ClipboardList className="w-4 h-4" />, label: 'My Applications' },
-          { to: '/profile', icon: <User className="w-4 h-4" />, label: 'Edit Profile' },
-          ...(role === 'ADMIN' ? [{ to: '/admin', icon: <Settings className="w-4 h-4" />, label: 'Admin Panel' }] : []),
-        ].map(link => (
-          <Link key={link.to} to={link.to}
-            className="flex items-center gap-2.5 text-sm text-gray-700 hover:text-zidio-green hover:bg-emerald-50 px-2 py-2 rounded-lg transition-colors font-medium">
-            <span className="text-gray-500">{link.icon}</span> {link.label}
-          </Link>
-        ))}
+      {/* ── Quick Links ── */}
+      <div className="card" style={{ padding: '1rem' }}>
+        <p className="section-label">Quick Links</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+          {quickLinks.map(({ to, icon: Icon, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className="quick-link"
+              style={{
+                color: location.pathname === to ? 'var(--brand)' : undefined,
+                background: location.pathname === to ? 'var(--brand-dim)' : undefined,
+                fontWeight: location.pathname === to ? 600 : 500,
+              }}
+            >
+              <Icon
+                style={{
+                  width: 16,
+                  height: 16,
+                  color: location.pathname === to ? 'var(--brand)' : 'var(--text-muted)',
+                  flexShrink: 0,
+                }}
+              />
+              {label}
+            </Link>
+          ))}
+        </div>
       </div>
 
-      {/* Trending */}
-      <div className="card p-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Trending Topics</p>
-        {['#ReactDeveloper', '#HiringNow', '#Freshers2025', '#TechJobs', '#Zidio'].map((tag, i) => (
-          <div key={tag} className="flex items-center justify-between py-1.5 cursor-pointer hover:text-zidio-green transition-colors">
-            <span className="text-sm text-zidio-green font-medium">{tag}</span>
-            <span className="text-xs text-gray-400">{(5 - i) * 120 + 'k'}</span>
+      {/* ── Trending ── */}
+      <div className="card" style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.625rem' }}>
+          <p className="section-label" style={{ marginBottom: 0 }}>Trending</p>
+          <TrendingUp style={{ width: 14, height: 14, color: 'var(--brand)' }} />
+        </div>
+        {TRENDING.map(({ tag, count }) => (
+          <div
+            key={tag}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.4rem 0.375rem',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-badge)')}
+            onMouseLeave={e => (e.currentTarget.style.background = '')}
+          >
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--brand)' }}>{tag}</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{count}</span>
           </div>
         ))}
       </div>

@@ -3,47 +3,29 @@ import Header from '../components/Header';
 import axiosInstance from '../api/axios';
 import { updateProfile, uploadProfilePicture, uploadResume } from '../api/profile';
 import { getDashboardStats } from '../api/jobs';
-import { Camera, Edit2, FileText, Globe, Code, Briefcase, Book, MapPin, ExternalLink } from 'lucide-react';
+import { Camera, Edit2, FileText, Globe, Code, Briefcase, Book, ExternalLink, Save, X } from 'lucide-react';
 
 const Profile = () => {
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<any>(null);
   const [role, setRole] = useState('STUDENT');
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: '', skills: '', companyName: '', bio: '',
-    phone: '', college: '', branch: '', yearOfPassing: '',
-    linkedinUrl: '', githubUrl: '', experience: ''
-  });
+  const [editForm, setEditForm] = useState<any>({ name: '', skills: '', companyName: '', bio: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', experience: '' });
   const [uploading, setUploading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
 
   const fetchProfile = async () => {
     try {
       const r = await axiosInstance.get('/student/profile');
-      setProfile(r.data);
-      setRole('STUDENT');
-      setEditForm({
-        name: r.data.name || '', skills: r.data.skills || '', bio: r.data.bio || '',
-        phone: r.data.phone || '', college: r.data.college || '', branch: r.data.branch || '',
-        yearOfPassing: r.data.yearOfPassing || '', linkedinUrl: r.data.linkedinUrl || '',
-        githubUrl: r.data.githubUrl || '', experience: r.data.experience || '', companyName: ''
-      });
-      // Fetch dashboard stats for student
-      try {
-        const s = await getDashboardStats();
-        setStats(s);
-      } catch {}
+      setProfile(r.data); setRole('STUDENT');
+      setEditForm({ name: r.data.name || '', skills: r.data.skills || '', bio: r.data.bio || '', phone: r.data.phone || '', college: r.data.college || '', branch: r.data.branch || '', yearOfPassing: r.data.yearOfPassing || '', linkedinUrl: r.data.linkedinUrl || '', githubUrl: r.data.githubUrl || '', experience: r.data.experience || '', companyName: '' });
+      try { setStats(await getDashboardStats()); } catch {}
     } catch {
       try {
         const r = await axiosInstance.get('/recruiter/profile');
-        setProfile(r.data);
-        setRole('RECRUITER');
-        setEditForm({
-          name: r.data.name || '', companyName: r.data.companyName || '', bio: r.data.bio || '',
-          skills: '', phone: '', college: '', branch: '', yearOfPassing: '',
-          linkedinUrl: '', githubUrl: '', experience: ''
-        });
+        setProfile(r.data); setRole('RECRUITER');
+        setEditForm({ name: r.data.name || '', companyName: r.data.companyName || '', bio: r.data.bio || '', skills: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', experience: '' });
       } catch (e) { console.error(e); }
     } finally { setLoading(false); }
   };
@@ -51,12 +33,10 @@ const Profile = () => {
   useEffect(() => { fetchProfile(); }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await updateProfile(role, editForm);
-      setIsEditing(false);
-      fetchProfile();
-    } catch { alert('Failed to update.'); }
+    e.preventDefault(); setSaving(true);
+    try { await updateProfile(role, editForm); setIsEditing(false); fetchProfile(); }
+    catch { alert('Failed to update.'); }
+    finally { setSaving(false); }
   };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
@@ -70,171 +50,174 @@ const Profile = () => {
     finally { setUploading(false); }
   };
 
-  const initials = profile?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+  const initials = profile?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  const fieldLabel = (text: string) => (
+    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>{text}</label>
+  );
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page)', transition: 'background 0.3s ease' }}>
       <Header />
-      <main className="max-w-[860px] mx-auto pt-6 px-4 pb-12">
+      <main style={{ maxWidth: 860, margin: '0 auto', padding: '1.5rem 1rem 3rem' }}>
         {loading ? (
-          <div className="card overflow-hidden animate-fadeIn">
-            <div className="skeleton h-40 rounded-none" />
-            <div className="p-6 pt-16">
-              <div className="skeleton h-5 w-40 mb-2" />
-              <div className="skeleton h-3 w-64 mb-1" />
-              <div className="skeleton h-3 w-32" />
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <div className="skeleton" style={{ height: 160, borderRadius: 0 }} />
+            <div style={{ padding: '4rem 1.5rem 1.5rem' }}>
+              <div className="skeleton" style={{ height: 18, width: '35%', marginBottom: 10 }} />
+              <div className="skeleton" style={{ height: 13, width: '55%', marginBottom: 6 }} />
+              <div className="skeleton" style={{ height: 13, width: '30%' }} />
             </div>
           </div>
         ) : (
-          <div className="animate-fadeInUp">
-            {/* Profile Card */}
-            <div className="card overflow-hidden">
+          <div className="animate-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Main profile card */}
+            <div className="card" style={{ overflow: 'hidden' }}>
               {/* Banner */}
-              <div className="profile-banner h-40 relative">
+              <div className="profile-banner" style={{ height: 160, position: 'relative' }} />
+
+              {/* Avatar + Info */}
+              <div style={{ padding: '0 1.5rem 1.5rem', marginTop: '-48px' }}>
                 {/* Avatar */}
-                <div className="absolute -bottom-12 left-6 group">
-                  <div className="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 shadow-lg overflow-hidden bg-white dark:bg-gray-800 relative">
+                <div style={{ position: 'relative', width: 96, display: 'inline-block', marginBottom: '1rem' }}>
+                  <div style={{ width: 96, height: 96, borderRadius: '50%', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', background: 'var(--bg-badge)', position: 'relative' }}>
                     {profile?.profilePictureUrl ? (
-                      <img src={profile.profilePictureUrl} alt="avatar" className="w-full h-full object-cover" />
+                      <img src={profile.profilePictureUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-3xl font-bold">{initials}</div>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--brand-dim)', color: 'var(--brand)', fontSize: '1.75rem', fontWeight: 800 }}>{initials}</div>
                     )}
-                    <label className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white cursor-pointer rounded-full">
-                      <Camera className="w-6 h-6" />
-                      <input type="file" accept="image/*" className="hidden" onChange={e => handleFile(e, 'picture')} />
+                    <label style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: '50%', color: '#fff' }} className="avatar-overlay">
+                      <Camera style={{ width: 20, height: 20 }} />
+                      <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e, 'picture')} />
                     </label>
                   </div>
                 </div>
-              </div>
 
-              {/* Info */}
-              <div className="px-6 pt-16 pb-6">
                 {isEditing ? (
-                  <form onSubmit={handleUpdate} className="flex flex-col gap-4 max-w-lg">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <form onSubmit={handleUpdate} style={{ maxWidth: 560 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
-                        <input className="input-field" placeholder="Full Name" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} required />
+                        {fieldLabel('Full Name *')}
+                        <input className="input-field" placeholder="Full Name" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} required />
                       </div>
                       {role === 'STUDENT' && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
-                          <input className="input-field" placeholder="Phone number" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} />
+                          {fieldLabel('Phone')}
+                          <input className="input-field" placeholder="Phone number" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} />
                         </div>
                       )}
                       {role === 'RECRUITER' && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
-                          <input className="input-field" placeholder="Company Name" value={editForm.companyName} onChange={e => setEditForm({...editForm, companyName: e.target.value})} />
+                          {fieldLabel('Company Name')}
+                          <input className="input-field" placeholder="Company Name" value={editForm.companyName} onChange={e => setEditForm({ ...editForm, companyName: e.target.value })} />
                         </div>
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bio</label>
-                      <textarea className="input-field" rows={2} placeholder="Short bio…" value={editForm.bio} onChange={e => setEditForm({...editForm, bio: e.target.value})} />
+                    <div style={{ marginBottom: '1rem' }}>
+                      {fieldLabel('Bio')}
+                      <textarea className="input-field" rows={2} placeholder="Short bio…" value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} style={{ resize: 'none' }} />
                     </div>
                     {role === 'STUDENT' && (
                       <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">College</label>
-                            <input className="input-field" placeholder="College/University" value={editForm.college} onChange={e => setEditForm({...editForm, college: e.target.value})} />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Branch</label>
-                            <input className="input-field" placeholder="e.g. Computer Science" value={editForm.branch} onChange={e => setEditForm({...editForm, branch: e.target.value})} />
-                          </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                          <div>{fieldLabel('College')}<input className="input-field" placeholder="College/University" value={editForm.college} onChange={e => setEditForm({ ...editForm, college: e.target.value })} /></div>
+                          <div>{fieldLabel('Branch')}<input className="input-field" placeholder="e.g. Computer Science" value={editForm.branch} onChange={e => setEditForm({ ...editForm, branch: e.target.value })} /></div>
+                          <div>{fieldLabel('Year of Passing')}<input className="input-field" placeholder="e.g. 2025" value={editForm.yearOfPassing} onChange={e => setEditForm({ ...editForm, yearOfPassing: e.target.value })} /></div>
+                          <div>{fieldLabel('Skills')}<input className="input-field" placeholder="e.g. React, Java, Python" value={editForm.skills} onChange={e => setEditForm({ ...editForm, skills: e.target.value })} /></div>
+                          <div>{fieldLabel('LinkedIn URL')}<input className="input-field" placeholder="https://linkedin.com/in/…" value={editForm.linkedinUrl} onChange={e => setEditForm({ ...editForm, linkedinUrl: e.target.value })} /></div>
+                          <div>{fieldLabel('GitHub URL')}<input className="input-field" placeholder="https://github.com/…" value={editForm.githubUrl} onChange={e => setEditForm({ ...editForm, githubUrl: e.target.value })} /></div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skills</label>
-                          <input className="input-field" placeholder="e.g. React, Java, Python" value={editForm.skills} onChange={e => setEditForm({...editForm, skills: e.target.value})} />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">LinkedIn URL</label>
-                            <input className="input-field" placeholder="https://linkedin.com/in/…" value={editForm.linkedinUrl} onChange={e => setEditForm({...editForm, linkedinUrl: e.target.value})} />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">GitHub URL</label>
-                            <input className="input-field" placeholder="https://github.com/…" value={editForm.githubUrl} onChange={e => setEditForm({...editForm, githubUrl: e.target.value})} />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year of Passing</label>
-                          <input className="input-field" placeholder="e.g. 2025" value={editForm.yearOfPassing} onChange={e => setEditForm({...editForm, yearOfPassing: e.target.value})} />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Experience</label>
-                          <textarea className="input-field" rows={3} placeholder="Prior internships, projects, or relevant experience…" value={editForm.experience} onChange={e => setEditForm({...editForm, experience: e.target.value})} />
+                        <div style={{ marginBottom: '1rem' }}>
+                          {fieldLabel('Experience')}
+                          <textarea className="input-field" rows={3} placeholder="Prior internships, projects, or relevant experience…" value={editForm.experience} onChange={e => setEditForm({ ...editForm, experience: e.target.value })} style={{ resize: 'vertical' }} />
                         </div>
                       </>
                     )}
-                    <div className="flex gap-3">
-                      <button type="submit" className="btn-primary">Save Changes</button>
-                      <button type="button" className="btn-outline" onClick={() => setIsEditing(false)}>Cancel</button>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <button type="submit" className="btn-primary" disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <Save style={{ width: 15, height: 15 }} />{saving ? 'Saving…' : 'Save Changes'}
+                      </button>
+                      <button type="button" className="btn-outline" onClick={() => setIsEditing(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <X style={{ width: 15, height: 15 }} />Cancel
+                      </button>
                     </div>
                   </form>
                 ) : (
                   <div>
-                    <div className="flex items-start justify-between flex-wrap gap-4">
-                      <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{profile?.name}</h1>
-                        {profile?.bio && <p className="text-gray-600 dark:text-gray-400 mt-1 max-w-lg">{profile.bio}</p>}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>{profile?.name}</h1>
+
+                        {/* Role badge */}
+                        <span style={{ display: 'inline-block', background: role === 'STUDENT' ? 'var(--brand-dim)' : role === 'RECRUITER' ? 'var(--color-info-bg)' : 'var(--color-warn-bg)', color: role === 'STUDENT' ? 'var(--brand)' : role === 'RECRUITER' ? 'var(--color-info-text)' : 'var(--color-warn-text)', fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.6rem', borderRadius: '999px', marginBottom: '0.625rem' }}>
+                          {role}
+                        </span>
+
+                        {profile?.bio && <p style={{ margin: '0.375rem 0 0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 520 }}>{profile.bio}</p>}
+
+                        {/* Skills */}
                         {role === 'STUDENT' && profile?.skills && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.75rem' }}>
                             {profile.skills.split(',').map((skill: string, i: number) => (
-                              <span key={i} className="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-700">{skill.trim()}</span>
+                              <span key={i} className="skill-tag">{skill.trim()}</span>
                             ))}
                           </div>
                         )}
+
+                        {/* Company */}
                         {role === 'RECRUITER' && profile?.companyName && (
-                          <p className="text-gray-600 dark:text-gray-400 font-medium mt-0.5 flex items-center gap-1"><Briefcase className="w-4 h-4" /> {profile.companyName}</p>
+                          <p style={{ margin: '0 0 0.625rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.9rem' }}>
+                            <Briefcase style={{ width: 15, height: 15 }} />{profile.companyName}
+                          </p>
                         )}
-                        <div className="flex flex-wrap gap-3 mt-3 text-sm text-gray-500 dark:text-gray-400">
+
+                        {/* Meta info */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.875rem', fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                           <span>{profile?.email}</span>
-                          <span className={`font-semibold ${role === 'STUDENT' ? 'text-emerald-600' : 'text-blue-600'}`}>{role}</span>
+                          {role === 'STUDENT' && profile?.college && <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Book style={{ width: 13, height: 13 }} />{profile.college}{profile.branch ? ` · ${profile.branch}` : ''}</span>}
+                          {role === 'STUDENT' && profile?.yearOfPassing && <span>Batch {profile.yearOfPassing}</span>}
+                          {profile?.phone && <span>{profile.phone}</span>}
                         </div>
-                        {role === 'STUDENT' && (
-                          <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            {profile?.college && <span className="flex items-center gap-1"><Book className="w-4 h-4" /> {profile.college}{profile.branch ? ` · ${profile.branch}` : ''}</span>}
-                            {profile?.yearOfPassing && <span>Batch {profile.yearOfPassing}</span>}
-                            {profile?.phone && <span>{profile.phone}</span>}
-                          </div>
-                        )}
-                        {/* Social Links */}
+
+                        {/* Links */}
                         {role === 'STUDENT' && (profile?.linkedinUrl || profile?.githubUrl) && (
-                          <div className="flex gap-3 mt-3">
+                          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
                             {profile.linkedinUrl && (
-                              <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-blue-600 hover:underline">
-                                <Globe className="w-4 h-4" /> LinkedIn <ExternalLink className="w-3 h-3" />
+                              <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.825rem', fontWeight: 600, color: 'var(--color-info-text)', textDecoration: 'none' }}>
+                                <Globe style={{ width: 14, height: 14 }} />LinkedIn<ExternalLink style={{ width: 11, height: 11 }} />
                               </a>
                             )}
                             {profile.githubUrl && (
-                              <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-gray-800 dark:text-gray-200 hover:underline">
-                                <Code className="w-4 h-4" /> GitHub <ExternalLink className="w-3 h-3" />
+                              <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}>
+                                <Code style={{ width: 14, height: 14 }} />GitHub<ExternalLink style={{ width: 11, height: 11 }} />
                               </a>
                             )}
                           </div>
                         )}
+
                         {/* Experience */}
                         {role === 'STUDENT' && profile?.experience && (
-                          <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 max-w-lg">
-                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Experience</p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{profile.experience}</p>
+                          <div style={{ marginTop: '0.75rem', padding: '0.875rem 1rem', background: 'var(--bg-page)', borderRadius: '10px', border: '1px solid var(--border-default)', maxWidth: 520 }}>
+                            <p style={{ margin: '0 0 0.375rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Experience</p>
+                            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line', lineHeight: 1.65 }}>{profile.experience}</p>
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-3 flex-wrap">
-                        <button onClick={() => setIsEditing(true)} className="btn-primary flex items-center gap-2"><Edit2 className="w-4 h-4"/> Edit Profile</button>
+
+                      {/* Action buttons */}
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
+                        <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                          <Edit2 style={{ width: 14, height: 14 }} />Edit Profile
+                        </button>
                         {role === 'STUDENT' && (
-                          <label className={`btn-outline cursor-pointer flex items-center gap-2 ${uploading ? 'opacity-60' : ''}`}>
-                            <FileText className="w-4 h-4" /> Upload Resume
-                            <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={e => handleFile(e, 'resume')} disabled={uploading} />
+                          <label className="btn-outline" style={{ cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                            <FileText style={{ width: 14, height: 14 }} />Upload Resume
+                            <input type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={e => handleFile(e, 'resume')} disabled={uploading} />
                           </label>
                         )}
                         {role === 'STUDENT' && profile?.resumeUrl && (
-                          <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer" className="btn-outline flex items-center gap-2">
-                            <FileText className="w-4 h-4" /> View Resume <ExternalLink className="w-3 h-3" />
+                          <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', textDecoration: 'none' }}>
+                            <FileText style={{ width: 14, height: 14 }} />View Resume<ExternalLink style={{ width: 12, height: 12 }} />
                           </a>
                         )}
                       </div>
@@ -244,41 +227,27 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Dashboard Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.875rem' }}>
               {role === 'STUDENT' && stats ? (
                 <>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-zidio-green">{stats.totalApplications}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Applications</p>
-                  </div>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-emerald-600">{stats.shortlisted}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Shortlisted</p>
-                  </div>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-blue-600">{stats.savedJobs}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Saved Jobs</p>
-                  </div>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-indigo-600">{stats.connections}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Connections</p>
-                  </div>
+                  {[
+                    { value: stats.totalApplications, label: 'Applications',  color: 'var(--brand)' },
+                    { value: stats.shortlisted,       label: 'Shortlisted',   color: 'var(--color-success-text)' },
+                    { value: stats.savedJobs,         label: 'Saved Jobs',    color: 'var(--color-info-text)' },
+                    { value: stats.connections,       label: 'Connections',   color: '#7c3aed' },
+                  ].map(s => (
+                    <div key={s.label} className="stat-card">
+                      <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+                      <div className="stat-label">{s.label}</div>
+                    </div>
+                  ))}
                 </>
               ) : (
                 <>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-zidio-green">—</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Connections</p>
-                  </div>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-zidio-green">—</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Applications Sent</p>
-                  </div>
-                  <div className="card p-4 flex flex-col items-center text-center">
-                    <p className="text-2xl font-bold text-zidio-green">—</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Profile Views</p>
-                  </div>
+                  {['Connections', 'Applications', 'Profile Views'].map(l => (
+                    <div key={l} className="stat-card"><div className="stat-value">—</div><div className="stat-label">{l}</div></div>
+                  ))}
                 </>
               )}
             </div>

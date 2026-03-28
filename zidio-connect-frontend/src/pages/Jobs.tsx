@@ -1,30 +1,37 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../components/Header';
-import { getAllJobs, applyForJob, createJob, toggleSaveJob, getJobDetail } from '../api/jobs';
-import { Search, MapPin, DollarSign, ClipboardList, Bookmark, BookmarkCheck, ChevronDown, Briefcase, Filter, X, Clock, Loader2 } from 'lucide-react';
+import { getAllJobs, applyForJob, createJob, toggleSaveJob } from '../api/jobs';
+import { Search, MapPin, DollarSign, ClipboardList, Bookmark, BookmarkCheck, Briefcase, Filter, X, Clock, Loader2, Plus } from 'lucide-react';
 
-const SkeletonJobCard = () => (
-  <div className="card p-5">
-    <div className="flex gap-3 mb-3">
-      <div className="skeleton w-10 h-10 rounded-lg" />
-      <div className="flex-1">
-        <div className="skeleton h-4 w-2/3 mb-1" />
-        <div className="skeleton h-3 w-1/2" />
-      </div>
+const SkeletonCard = () => (
+  <div className="card" style={{ padding: '1.25rem' }}>
+    <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.875rem' }}>
+      <div className="skeleton" style={{ width: 44, height: 44, borderRadius: '10px', flexShrink: 0 }} />
+      <div style={{ flex: 1 }}><div className="skeleton" style={{ height: 14, width: '60%', marginBottom: 6 }} /><div className="skeleton" style={{ height: 11, width: '45%' }} /></div>
     </div>
-    <div className="skeleton h-3 w-full mb-1" />
-    <div className="skeleton h-3 w-5/6 mb-4" />
-    <div className="skeleton h-9 w-full rounded-full" />
+    <div className="skeleton" style={{ height: 11, width: '100%', marginBottom: 6 }} />
+    <div className="skeleton" style={{ height: 11, width: '80%', marginBottom: '1rem' }} />
+    <div className="skeleton" style={{ height: 36, borderRadius: '999px' }} />
   </div>
 );
 
+const Chip = ({ icon: Icon, label, type }: any) => {
+  const map: any = { job: { bg: 'var(--color-info-bg)', text: 'var(--color-info-text)' }, internship: { bg: 'var(--color-warn-bg)', text: 'var(--color-warn-text)' }, location: { bg: 'var(--bg-badge)', text: 'var(--text-secondary)' }, salary: { bg: 'var(--color-success-bg)', text: 'var(--color-success-text)' }, time: { bg: 'var(--bg-badge)', text: 'var(--text-muted)' } };
+  const { bg, text } = map[type] || map.location;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.175rem 0.55rem', borderRadius: '999px', background: bg, color: text, fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+      {Icon && <Icon style={{ width: 12, height: 12 }} />}{label}
+    </span>
+  );
+};
+
 const Jobs = () => {
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPostJob, setShowPostJob] = useState(false);
   const [newJob, setNewJob] = useState({ title: '', companyName: '', location: '', description: '', salary: '', type: 'JOB', skills: '' });
-  const [applying, setApplying] = useState(null);
-  const [saving, setSaving] = useState(null);
+  const [applying, setApplying] = useState<any>(null);
+  const [saving, setSaving] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
@@ -33,202 +40,113 @@ const Jobs = () => {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [showCoverLetter, setShowCoverLetter] = useState(null);
+  const [showCoverLetter, setShowCoverLetter] = useState<any>(null);
   const [coverLetter, setCoverLetter] = useState('');
   const role = localStorage.getItem('role');
 
   const fetchJobs = useCallback(async (pageNum = 0, append = false) => {
     try {
-      const data = await getAllJobs({
-        keyword: search || undefined,
-        type: typeFilter || undefined,
-        location: locationFilter || undefined,
-        page: pageNum,
-        size: 12
-      });
+      const data = await getAllJobs({ keyword: search || undefined, type: typeFilter || undefined, location: locationFilter || undefined, page: pageNum, size: 12 });
       const items = data.content || data;
-      if (append) {
-        setJobs(prev => [...prev, ...items]);
-      } else {
-        setJobs(Array.isArray(items) ? items : []);
-      }
+      if (append) setJobs(prev => [...prev, ...items]); else setJobs(Array.isArray(items) ? items : []);
       setTotalElements(data.totalElements || items.length || 0);
       setHasMore(data.last === false);
       setPage(pageNum);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); setLoadingMore(false); }
   }, [search, typeFilter, locationFilter]);
 
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => fetchJobs(0), 300);
-    return () => clearTimeout(timer);
-  }, [fetchJobs]);
+  useEffect(() => { setLoading(true); const t = setTimeout(() => fetchJobs(0), 300); return () => clearTimeout(t); }, [fetchJobs]);
 
-  const handleApply = async (jobId) => {
+  const handleApply = async (jobId: any) => {
     if (showCoverLetter === jobId) {
-      // Submit with cover letter
       setApplying(jobId);
-      try {
-        await applyForJob(jobId, coverLetter || undefined);
-        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, alreadyApplied: true } : j));
-        setShowCoverLetter(null);
-        setCoverLetter('');
-      } catch (err: any) {
-        const msg = err?.response?.data?.message || "Application failed.";
-        alert(msg);
-      } finally {
-        setApplying(null);
-      }
-    } else {
-      setShowCoverLetter(jobId);
-    }
+      try { await applyForJob(jobId, coverLetter || undefined); setJobs(prev => prev.map(j => j.id === jobId ? { ...j, alreadyApplied: true } : j)); setShowCoverLetter(null); setCoverLetter(''); }
+      catch (err: any) { alert(err?.response?.data?.message || 'Application failed.'); }
+      finally { setApplying(null); }
+    } else { setShowCoverLetter(jobId); }
   };
 
-  const handleSave = async (jobId) => {
+  const handleSave = async (jobId: any) => {
     setSaving(jobId);
-    try {
-      await toggleSaveJob(jobId);
-      setJobs(prev => prev.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(null);
-    }
+    try { await toggleSaveJob(jobId); setJobs(prev => prev.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j)); }
+    catch (e) { console.error(e); } finally { setSaving(null); }
   };
 
-  const handlePostJob = async (e) => {
+  const handlePostJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await createJob(newJob);
-      setShowPostJob(false);
-      setNewJob({ title: '', companyName: '', location: '', description: '', salary: '', type: 'JOB', skills: '' });
-      fetchJobs(0);
-    } catch {
-      alert("Failed to post job. Ensure you are logged in as a Recruiter.");
-    }
+    try { await createJob(newJob); setShowPostJob(false); setNewJob({ title: '', companyName: '', location: '', description: '', salary: '', type: 'JOB', skills: '' }); fetchJobs(0); }
+    catch { alert('Failed to post job.'); }
   };
 
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    fetchJobs(page + 1, true);
-  };
-
-  const clearFilters = () => {
-    setSearch('');
-    setTypeFilter('');
-    setLocationFilter('');
-  };
-
+  const clearFilters = () => { setSearch(''); setTypeFilter(''); setLocationFilter(''); };
   const hasFilters = search || typeFilter || locationFilter;
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-page)', transition: 'background 0.3s ease' }}>
       <Header />
-      <main className="max-w-[1128px] mx-auto pt-6 px-4 pb-12">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <main style={{ maxWidth: 1128, margin: '0 auto', padding: '1.5rem 1rem 3rem' }}>
+        {/* Header row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Job Opportunities</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{totalElements} position{totalElements !== 1 ? 's' : ''} available</p>
+            <h1 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Job Opportunities</h1>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{totalElements} position{totalElements !== 1 ? 's' : ''} available</p>
           </div>
           {(role === 'RECRUITER' || role === 'ADMIN') && (
-            <button onClick={() => setShowPostJob(!showPostJob)} className="btn-outline">
-              {showPostJob ? '✕ Cancel' : '+ Post a Job'}
+            <button className="btn-outline" onClick={() => setShowPostJob(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+              {showPostJob ? <><X style={{ width: 15, height: 15 }} />Cancel</> : <><Plus style={{ width: 15, height: 15 }} />Post a Job</>}
             </button>
           )}
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-col gap-3 mb-6">
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                className="input-field pl-10"
-                placeholder="Search by title, company, or description…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
+        {/* Search & filters */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <Search style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: 'var(--text-muted)' }} />
+              <input className="input-field" placeholder="Search by title, company, or keywords…" value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.5rem' }} />
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`btn-outline flex items-center gap-2 ${showFilters ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : ''}`}
-            >
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:block">Filters</span>
+            <button className="btn-outline" onClick={() => setShowFilters(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexShrink: 0, ...(showFilters ? { background: 'var(--brand-dim)', borderColor: 'var(--brand)', color: 'var(--brand)' } : {}) }}>
+              <Filter style={{ width: 15, height: 15 }} /><span className="hidden sm:block">Filters</span>
             </button>
           </div>
-
           {showFilters && (
-            <div className="flex flex-wrap gap-3 animate-fadeInUp">
-              <select
-                value={typeFilter}
-                onChange={e => setTypeFilter(e.target.value)}
-                className="input-field w-auto min-w-[140px]"
-              >
-                <option value="">All Types</option>
-                <option value="JOB">Full-time Job</option>
-                <option value="INTERNSHIP">Internship</option>
+            <div className="animate-fadeInUp" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="input-field" style={{ width: 'auto', minWidth: 150 }}>
+                <option value="">All Types</option><option value="JOB">Full-time Job</option><option value="INTERNSHIP">Internship</option>
               </select>
-              <input
-                className="input-field w-auto min-w-[180px]"
-                placeholder="Filter by location…"
-                value={locationFilter}
-                onChange={e => setLocationFilter(e.target.value)}
-              />
-              {hasFilters && (
-                <button onClick={clearFilters} className="btn-outline text-sm flex items-center gap-1">
-                  <X className="w-3.5 h-3.5" /> Clear
-                </button>
-              )}
+              <input className="input-field" placeholder="Filter by location…" value={locationFilter} onChange={e => setLocationFilter(e.target.value)} style={{ width: 'auto', minWidth: 180 }} />
+              {hasFilters && <button className="btn-ghost" onClick={clearFilters} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}><X style={{ width: 14, height: 14 }} />Clear</button>}
             </div>
           )}
         </div>
 
-        {/* Post Job Form (Recruiter only) */}
+        {/* Post Job Form */}
         {showPostJob && (
-          <div className="card p-6 mb-6 animate-fadeInUp">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-gray-700 dark:text-gray-300"/> Post a New Job</h2>
-            <form onSubmit={handlePostJob} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="card animate-fadeInUp" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: '0 0 1.25rem', color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ClipboardList style={{ width: 18, height: 18, color: 'var(--text-muted)' }} />Post a New Job
+            </h2>
+            <form onSubmit={handlePostJob} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              {[{ label: 'Job Title *', key: 'title', placeholder: 'e.g. Frontend Developer', required: true }, { label: 'Company Name *', key: 'companyName', placeholder: 'e.g. Zidio Corp', required: true }, { label: 'Location', key: 'location', placeholder: 'e.g. Remote, Bangalore' }, { label: 'Salary/Stipend', key: 'salary', placeholder: 'e.g. ₹30,000/month' }].map(({ label, key, placeholder, required }) => (
+                <div key={key}>
+                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>{label}</label>
+                  <input className="input-field" placeholder={placeholder} required={required} value={(newJob as any)[key]} onChange={e => setNewJob({ ...newJob, [key]: e.target.value })} />
+                </div>
+              ))}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Title *</label>
-                <input className="input-field" placeholder="e.g. Frontend Developer" required value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name *</label>
-                <input className="input-field" placeholder="e.g. Zidio Corp" required value={newJob.companyName} onChange={e => setNewJob({...newJob, companyName: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                <input className="input-field" placeholder="e.g. Remote, Bangalore" value={newJob.location} onChange={e => setNewJob({...newJob, location: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Salary/Stipend</label>
-                <input className="input-field" placeholder="e.g. ₹30,000/month" value={newJob.salary} onChange={e => setNewJob({...newJob, salary: e.target.value})} />
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Type *</label>
+                <select className="input-field" value={newJob.type} onChange={e => setNewJob({ ...newJob, type: e.target.value })}><option value="JOB">Full-time Job</option><option value="INTERNSHIP">Internship</option></select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
-                <select className="input-field" value={newJob.type} onChange={e => setNewJob({...newJob, type: e.target.value})}>
-                  <option value="JOB">Full-time Job</option>
-                  <option value="INTERNSHIP">Internship</option>
-                </select>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Required Skills</label>
+                <input className="input-field" placeholder="e.g. React, Node.js, Java" value={newJob.skills} onChange={e => setNewJob({ ...newJob, skills: e.target.value })} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Required Skills</label>
-                <input className="input-field" placeholder="e.g. React, Node.js, Java" value={newJob.skills} onChange={e => setNewJob({...newJob, skills: e.target.value})} />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Job Description *</label>
+                <textarea className="input-field" rows={4} required placeholder="Describe the role, responsibilities, and requirements…" value={newJob.description} onChange={e => setNewJob({ ...newJob, description: e.target.value })} style={{ resize: 'vertical' }} />
               </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Job Description *</label>
-                <textarea className="input-field" rows={4} placeholder="Describe the role, responsibilities, and requirements…" required value={newJob.description} onChange={e => setNewJob({...newJob, description: e.target.value})} />
-              </div>
-              <div className="sm:col-span-2 flex gap-3">
+              <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem' }}>
                 <button type="submit" className="btn-primary">Post Job</button>
                 <button type="button" className="btn-outline" onClick={() => setShowPostJob(false)}>Cancel</button>
               </div>
@@ -236,101 +154,76 @@ const Jobs = () => {
           </div>
         )}
 
-        {/* Jobs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loading ? (
-            Array.from({length: 6}).map((_, i) => <SkeletonJobCard key={i} />)
-          ) : jobs.length > 0 ? jobs.map((job, i) => (
-            <div key={job.id} className="card p-5 flex flex-col justify-between animate-fadeInUp" style={{ animationDelay: `${i < 12 ? i * 0.04 : 0}s` }}>
-              <div>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-lg font-bold text-emerald-700 dark:text-emerald-300 flex-shrink-0">
-                      {(job.companyName || 'Z').charAt(0)}
+        {/* Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+          {loading ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />) : jobs.length > 0 ? (
+            jobs.map((job, i) => (
+              <div key={job.id} className="card animate-fadeInUp" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', animationDelay: `${i < 12 ? i * 0.04 : 0}s` }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.875rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: '10px', flexShrink: 0, background: 'var(--brand-dim)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem' }}>{(job.companyName || 'Z').charAt(0)}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <h3 style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.3 }}>{job.title}</h3>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>{job.companyName || job.recruiterName}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 leading-tight">{job.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{job.companyName || job.recruiterName}</p>
-                    </div>
-                  </div>
-                  {role === 'STUDENT' && (
-                    <button
-                      onClick={() => handleSave(job.id)}
-                      disabled={saving === job.id}
-                      className="text-gray-400 hover:text-emerald-600 transition-colors p-1"
-                      title={job.saved ? 'Unsave job' : 'Save job'}
-                    >
-                      {job.saved ? <BookmarkCheck className="w-5 h-5 text-emerald-600" /> : <Bookmark className="w-5 h-5" />}
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {job.type && <span className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" /> {job.type}</span>}
-                  {job.location && <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {job.location}</span>}
-                  {job.salary && <span className="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1"><DollarSign className="w-3.5 h-3.5" /> {job.salary}</span>}
-                  {job.timeAgo && <span className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {job.timeAgo}</span>}
-                </div>
-                {job.skills && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {job.skills.split(',').slice(0, 4).map((skill, idx) => (
-                      <span key={idx} className="text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600">{skill.trim()}</span>
-                    ))}
-                  </div>
-                )}
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{job.description || 'No description provided.'}</p>
-                {job.applicantCount > 0 && <p className="text-xs text-gray-400 mb-2">{job.applicantCount} applicant{job.applicantCount !== 1 ? 's' : ''}</p>}
-              </div>
-
-              {/* Cover letter modal */}
-              {showCoverLetter === job.id && (
-                <div className="mb-3 animate-fadeInUp">
-                  <textarea
-                    className="input-field text-sm mb-2"
-                    rows={3}
-                    placeholder="Write a cover letter (optional)…"
-                    value={coverLetter}
-                    onChange={e => setCoverLetter(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {role === 'STUDENT' && (
-                job.alreadyApplied ? (
-                  <div className="text-center text-sm font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 rounded-full py-2">✓ Applied</div>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleApply(job.id)}
-                      disabled={applying === job.id}
-                      className="btn-primary flex-1 justify-center"
-                    >
-                      {applying === job.id ? 'Applying…' : showCoverLetter === job.id ? 'Submit Application' : 'Apply Now'}
-                    </button>
-                    {showCoverLetter === job.id && (
-                      <button onClick={() => { setShowCoverLetter(null); setCoverLetter(''); }} className="btn-outline px-3">
-                        <X className="w-4 h-4" />
+                    {role === 'STUDENT' && (
+                      <button onClick={() => handleSave(job.id)} disabled={saving === job.id} style={{ background: 'none', border: 'none', cursor: 'pointer', color: job.saved ? 'var(--brand)' : 'var(--text-muted)', padding: '0.25rem', flexShrink: 0, transition: 'color 0.15s' }}>
+                        {job.saved ? <BookmarkCheck style={{ width: 18, height: 18 }} /> : <Bookmark style={{ width: 18, height: 18 }} />}
                       </button>
                     )}
                   </div>
-                )
-              )}
-            </div>
-          )) : (
-            <div className="col-span-3 text-center py-16">
-              <div className="flex justify-center mb-3">
-                <Search className="w-12 h-12 text-gray-300" />
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.75rem' }}>
+                    {job.type     && <Chip label={job.type}     type={job.type === 'INTERNSHIP' ? 'internship' : 'job'} icon={Briefcase} />}
+                    {job.location && <Chip label={job.location} type="location" icon={MapPin} />}
+                    {job.salary   && <Chip label={job.salary}   type="salary"   icon={DollarSign} />}
+                    {job.timeAgo  && <Chip label={job.timeAgo}  type="time"     icon={Clock} />}
+                  </div>
+                  {job.skills && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.75rem' }}>
+                      {job.skills.split(',').slice(0, 4).map((s: string, idx: number) => <span key={idx} className="skill-tag">{s.trim()}</span>)}
+                    </div>
+                  )}
+                  <p style={{ margin: '0 0 0.625rem', fontSize: '0.825rem', color: 'var(--text-secondary)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {job.description || 'No description provided.'}
+                  </p>
+                  {job.applicantCount > 0 && <p style={{ margin: '0 0 0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{job.applicantCount} applicant{job.applicantCount !== 1 ? 's' : ''}</p>}
+                </div>
+                {showCoverLetter === job.id && (
+                  <div style={{ marginBottom: '0.75rem' }} className="animate-fadeInUp">
+                    <textarea className="input-field" rows={3} placeholder="Write a cover letter (optional)…" value={coverLetter} onChange={e => setCoverLetter(e.target.value)} style={{ resize: 'none', fontSize: '0.85rem', marginBottom: 0 }} />
+                  </div>
+                )}
+                {role === 'STUDENT' && (
+                  job.alreadyApplied ? (
+                    <div style={{ textAlign: 'center', fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-success-text)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', borderRadius: '999px', padding: '0.5rem' }}>✓ Applied</div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => handleApply(job.id)} disabled={applying === job.id} className="btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
+                        {applying === job.id ? 'Applying…' : showCoverLetter === job.id ? 'Submit Application' : 'Apply Now'}
+                      </button>
+                      {showCoverLetter === job.id && (
+                        <button onClick={() => { setShowCoverLetter(null); setCoverLetter(''); }} className="btn-ghost" style={{ padding: '0.5rem 0.75rem' }}><X style={{ width: 16, height: 16 }} /></button>
+                      )}
+                    </div>
+                  )
+                )}
               </div>
-              <p className="text-gray-500 font-medium">No jobs match your search.</p>
-              {hasFilters && <button onClick={clearFilters} className="text-zidio-green text-sm font-semibold mt-2 hover:underline">Clear all filters</button>}
+            ))
+          ) : (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0' }}>
+              <Search style={{ width: 48, height: 48, color: 'var(--border-strong)', margin: '0 auto 0.75rem', display: 'block' }} />
+              <p style={{ color: 'var(--text-muted)', fontWeight: 500, marginBottom: '0.5rem' }}>No jobs match your search.</p>
+              {hasFilters && <button onClick={clearFilters} style={{ color: 'var(--brand)', fontSize: '0.875rem', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Clear all filters</button>}
             </div>
           )}
         </div>
 
-        {/* Load More */}
         {hasMore && !loading && (
-          <div className="mt-6">
-            <button onClick={handleLoadMore} disabled={loadingMore} className="btn-outline w-full justify-center py-3">
-              {loadingMore ? <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</span> : 'Load More Jobs'}
+          <div style={{ marginTop: '1.5rem' }}>
+            <button onClick={() => { setLoadingMore(true); fetchJobs(page + 1, true); }} disabled={loadingMore} className="btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>
+              {loadingMore ? <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Loader2 style={{ width: 15, height: 15, animation: 'spin 1s linear infinite' }} />Loading…</span> : 'Load More Jobs'}
             </button>
           </div>
         )}
