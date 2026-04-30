@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Info, Newspaper, ChevronDown } from 'lucide-react';
+import { getSuggestions, sendConnectionRequest } from '../api/connections';
 
 const NEWS = [
   { title: 'Tech hiring sees a strong rebound in 2025',         meta: 'Top story · 12.4k readers' },
@@ -10,15 +11,30 @@ const NEWS = [
   { title: 'Open source contributions boost career prospects',  meta: '3d ago · 3.5k readers' },
 ];
 
-const PEOPLE = [
-  { id: 1, name: 'Arjun Mehta',  role: 'Backend Dev @ Infosys',    initials: 'AM', color: 'avatar-blue' },
-  { id: 2, name: 'Sneha Patel',  role: 'UI/UX Designer @ Flipkart', initials: 'SP', color: 'avatar-red' },
-  { id: 3, name: 'Vikram Singh', role: 'Recruiter @ Google India',  initials: 'VS', color: 'avatar-amber' },
-];
-
 const FOOTER_LINKS = ['About', 'Help', 'Privacy', 'Terms', 'Advertising'];
 
 const Rightbar = () => {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const data = await getSuggestions();
+        setSuggestions(data.slice(0, 5));
+      } catch (e) { console.error(e); }
+    };
+    fetchSuggestions();
+  }, []);
+
+  const handleConnect = async (email: string) => {
+    try {
+      await sendConnectionRequest(email);
+      setSuggestions(prev => prev.filter(p => p.email !== email));
+    } catch (e) {
+      console.error(e);
+      alert('Failed to send connection request');
+    }
+  };
   return (
     <div style={{ width: 300, flexShrink: 0 }} className="hidden lg:flex flex-col gap-3">
       {/* ── Zidio News ── */}
@@ -127,37 +143,42 @@ const Rightbar = () => {
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-          {PEOPLE.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div className={`avatar avatar-md ${p.color}`}>{p.initials}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.825rem',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {p.name}
-                </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.75rem',
-                  color: 'var(--text-muted)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {p.role}
-                </p>
+          {suggestions.map(p => {
+            const initials = p.name ? p.name.charAt(0).toUpperCase() : p.email.charAt(0).toUpperCase();
+            const colors = ['avatar-green', 'avatar-blue', 'avatar-amber', 'avatar-red'];
+            const color = colors[p.email.charCodeAt(0) % colors.length];
+            return (
+              <div key={p.email} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className={`avatar avatar-md ${color}`}>{initials}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    margin: 0,
+                    fontSize: '0.825rem',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {p.name}
+                  </p>
+                  <p style={{
+                    margin: 0,
+                    fontSize: '0.75rem',
+                    color: 'var(--text-muted)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {p.role}
+                  </p>
+                </div>
+                <button onClick={() => handleConnect(p.email)} className="btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', flexShrink: 0 }}>
+                  Connect
+                </button>
               </div>
-              <button className="btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', flexShrink: 0 }}>
-                Connect
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <Link

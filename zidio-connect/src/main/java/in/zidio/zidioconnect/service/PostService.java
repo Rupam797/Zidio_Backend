@@ -126,6 +126,7 @@ public class PostService {
         dto.setId(post.getId());
         dto.setContent(post.getContent());
         dto.setImageUrl(post.getImageUrl());
+        dto.setVideoUrl(post.getVideoUrl());
         dto.setAuthorEmail(post.getAuthorEmail());
         dto.setAuthorName(post.getAuthorName());
         dto.setCreatedAt(post.getCreatedAt());

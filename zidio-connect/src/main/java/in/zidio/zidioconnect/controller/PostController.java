@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import org.springframework.web.multipart.MultipartFile;
+import in.zidio.zidioconnect.util.CloudinaryFileUploader;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -19,6 +23,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private CloudinaryFileUploader cloudinaryFileUploader;
 
     // GET all posts (paginated feed)
     @GetMapping
@@ -42,8 +49,22 @@ public class PostController {
         Post post = new Post();
         post.setContent(request.getContent());
         post.setImageUrl(request.getImageUrl());
+        post.setVideoUrl(request.getVideoUrl());
         post.setAuthorEmail(principal.getName());
         return ResponseEntity.ok(postService.createPost(post));
+    }
+
+    // POST upload media for a post
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadMedia(@RequestParam("file") MultipartFile file) {
+        try {
+            String fileUrl = cloudinaryFileUploader.upload(file);
+            Map<String, String> response = new HashMap<>();
+            response.put("url", fileUrl);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
     // PUT like/unlike a post

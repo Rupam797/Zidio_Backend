@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Briefcase, ClipboardList, User, Settings, Shield, TrendingUp } from 'lucide-react';
+import axiosInstance from '../api/axios';
 
 const TRENDING = [
   { tag: '#ReactDeveloper', count: '600k' },
@@ -14,8 +15,35 @@ const Sidebar = () => {
   const role = localStorage.getItem('role') || 'STUDENT';
   const email = localStorage.getItem('email') || '';
   const location = useLocation();
+  const [profile, setProfile] = useState<any>(null);
+  const [connectionsCount, setConnectionsCount] = useState<number | string>('—');
 
-  const initials = email.charAt(0).toUpperCase() || 'U';
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const endpoint = role === 'RECRUITER' ? '/recruiter/profile' : '/student/profile';
+        const r = await axiosInstance.get(endpoint);
+        setProfile(r.data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    const fetchConnections = async () => {
+      try {
+        const r = await axiosInstance.get('/connections');
+        const accepted = r.data.filter((c: any) => c.status === 'ACCEPTED');
+        setConnectionsCount(accepted.length);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    if (role !== 'ADMIN') {
+      fetchProfile();
+      fetchConnections();
+    }
+  }, [role]);
+
+  const initials = profile?.name ? profile.name.charAt(0).toUpperCase() : email.charAt(0).toUpperCase() || 'U';
   const roleLabel = role === 'RECRUITER' ? 'Recruiter' : role === 'ADMIN' ? 'Administrator' : 'Student';
 
   const quickLinks = [
@@ -36,12 +64,20 @@ const Sidebar = () => {
             <div
               className="avatar avatar-2xl avatar-green"
               style={{
+                position: 'relative',
+                zIndex: 1,
                 border: '3px solid var(--bg-card)',
                 boxShadow: 'var(--shadow-md)',
-                fontSize: '1.6rem',
+                fontSize: profile?.profilePictureUrl ? '1rem' : '1.6rem',
+                padding: profile?.profilePictureUrl ? 0 : undefined,
+                overflow: 'hidden'
               }}
             >
-              {initials}
+              {profile?.profilePictureUrl ? (
+                <img src={profile.profilePictureUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                initials
+              )}
             </div>
 
             <Link
@@ -56,7 +92,7 @@ const Sidebar = () => {
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--brand)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-primary)')}
             >
-              {email || 'Your Profile'}
+              {profile?.name || email || 'Your Profile'}
             </Link>
 
             <span style={{
@@ -80,11 +116,11 @@ const Sidebar = () => {
           }}>
             <div className="sidebar-stat-row">
               <span className="sidebar-stat-label">Profile views</span>
-              <span className="sidebar-stat-value">—</span>
+              <span className="sidebar-stat-value">{profile?.profileViews ?? 0}</span>
             </div>
             <div className="sidebar-stat-row">
               <span className="sidebar-stat-label">Connections</span>
-              <span className="sidebar-stat-value">—</span>
+              <span className="sidebar-stat-value">{connectionsCount}</span>
             </div>
           </div>
         </div>

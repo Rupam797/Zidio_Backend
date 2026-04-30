@@ -7,6 +7,7 @@ public class PostResponseDTO {
     private Long id;
     private String content;
     private String imageUrl;
+    private String videoUrl;
     private String authorEmail;
     private String authorName;
     private LocalDateTime createdAt;
@@ -25,6 +26,9 @@ public class PostResponseDTO {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getVideoUrl() { return videoUrl; }
+    public void setVideoUrl(String videoUrl) { this.videoUrl = videoUrl; }
 
     public String getAuthorEmail() { return authorEmail; }
     public void setAuthorEmail(String authorEmail) { this.authorEmail = authorEmail; }

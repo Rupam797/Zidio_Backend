@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import { getPendingRequests, getMyConnections, acceptConnectionRequest } from '../api/connections';
-import { UserCheck, UserPlus, Users, MessageSquare } from 'lucide-react';
+import { getPendingRequests, getMyConnections, acceptConnectionRequest, declineConnectionRequest } from '../api/connections';
+import { UserCheck, UserPlus, Users, MessageSquare, Check, X } from 'lucide-react';
 
 const Connections = () => {
   const [pending, setPending] = useState<any[]>([]);
@@ -22,6 +22,11 @@ const Connections = () => {
   const handleAccept = async (id: any) => {
     try { await acceptConnectionRequest(id); fetchData(); }
     catch (e) { console.error(e); alert('Failed to accept request'); }
+  };
+
+  const handleDecline = async (id: any) => {
+    try { await declineConnectionRequest(id); fetchData(); }
+    catch (e) { console.error(e); alert('Failed to decline request'); }
   };
 
   const currentUser = localStorage.getItem('email') || '';
@@ -60,9 +65,11 @@ const Connections = () => {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.625rem', flexShrink: 0 }}>
-                        <button className="btn-ghost" style={{ padding: '0.4rem 0.875rem', fontSize: '0.825rem' }}>Ignore</button>
+                        <button onClick={() => handleDecline(req.id)} className="btn-ghost" style={{ padding: '0.4rem 0.875rem', fontSize: '0.825rem', gap: '0.375rem', color: 'var(--color-danger-text)' }}>
+                          <X style={{ width: 14, height: 14 }} /> Decline
+                        </button>
                         <button onClick={() => handleAccept(req.id)} className="btn-primary" style={{ padding: '0.4rem 0.875rem', fontSize: '0.825rem', gap: '0.375rem' }}>
-                          <UserCheck style={{ width: 14, height: 14 }} />Accept
+                          <Check style={{ width: 14, height: 14 }} /> Accept
                         </button>
                       </div>
                     </div>

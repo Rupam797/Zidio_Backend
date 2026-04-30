@@ -6,8 +6,14 @@ export const sendConnectionRequest = (receiverEmail) =>
 export const acceptConnectionRequest = (id) =>
   axiosInstance.put(`/connections/${id}/accept`).then(r => r.data);
 
+export const declineConnectionRequest = (id) =>
+  axiosInstance.delete(`/connections/${id}/decline`).then(r => r.data);
+
 export const getPendingRequests = () =>
   axiosInstance.get('/connections/pending').then(r => r.data);
 
 export const getMyConnections = () =>
   axiosInstance.get('/connections').then(r => r.data);
+
+export const getSuggestions = () =>
+  axiosInstance.get('/connections/suggestions').then(r => r.data);

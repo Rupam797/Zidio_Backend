@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2 } from 'lucide-react';
-import { getAllPosts, createPost, likePost, getComments, addComment } from '../api/posts';
+import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Video as VideoIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2 } from 'lucide-react';
+import { getAllPosts, createPost, likePost, getComments, addComment, uploadPostMedia } from '../api/posts';
 
 const Feed = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [postText, setPostText] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [showImageInput, setShowImageInput] = useState(false);
+  const [showVideoInput, setShowVideoInput] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
@@ -27,11 +31,24 @@ const Feed = () => {
   useEffect(() => { fetchPosts(); }, []);
 
   const handlePost = async () => {
-    if (!postText.trim()) return;
+    if (!postText.trim() && !imageFile && !videoFile) return;
     setPosting(true);
     try {
-      await createPost({ content: postText });
-      setPostText(''); setExpanded(false);
+      let finalImageUrl = '';
+      let finalVideoUrl = '';
+
+      if (imageFile) {
+        const res = await uploadPostMedia(imageFile);
+        finalImageUrl = res.url;
+      }
+      if (videoFile) {
+        const res = await uploadPostMedia(videoFile);
+        finalVideoUrl = res.url;
+      }
+
+      await createPost({ content: postText, imageUrl: finalImageUrl, videoUrl: finalVideoUrl });
+      setPostText(''); setImageFile(null); setVideoFile(null); setExpanded(false);
+      setShowImageInput(false); setShowVideoInput(false);
       fetchPosts(0);
     } catch (e) { console.error(e); }
     finally { setPosting(false); }
@@ -59,18 +76,21 @@ const Feed = () => {
         {expanded && (
           <div style={{ marginTop: '0.875rem' }} className="animate-fadeInUp">
             <textarea value={postText} onChange={e => setPostText(e.target.value)} placeholder="What do you want to talk about?" className="input-field" rows={4} autoFocus maxLength={3000} style={{ resize: 'none', marginBottom: '0.75rem' }} />
+            {showImageInput && <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="input-field" style={{ marginBottom: '0.5rem', fontSize: '0.8rem' }} />}
+            {showVideoInput && <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="input-field" style={{ marginBottom: '0.5rem', fontSize: '0.8rem' }} />}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', gap: '0.25rem' }}>
-                {[{ Icon: ImageIcon, label: 'Photo', color: 'var(--color-info-text)' }, { Icon: Calendar, label: 'Event', color: '#f97316' }, { Icon: Newspaper, label: 'Article', color: '#ef4444' }].map(({ Icon, label, color }) => (
-                  <button key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.6rem', borderRadius: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, color, fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                    <Icon style={{ width: 15, height: 15 }} />{label}
-                  </button>
-                ))}
+                <button onClick={() => setShowImageInput(!showImageInput)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.6rem', borderRadius: '8px', background: showImageInput ? 'var(--bg-badge)' : 'none', border: 'none', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, color: 'var(--color-info-text)', fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => !showImageInput && (e.currentTarget.style.background = 'none')}>
+                  <ImageIcon style={{ width: 15, height: 15 }} />Photo
+                </button>
+                <button onClick={() => setShowVideoInput(!showVideoInput)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.6rem', borderRadius: '8px', background: showVideoInput ? 'var(--bg-badge)' : 'none', border: 'none', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, color: '#8b5cf6', fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => !showVideoInput && (e.currentTarget.style.background = 'none')}>
+                  <VideoIcon style={{ width: 15, height: 15 }} />Video
+                </button>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{postText.length}/3000</span>
-                <button className="btn-outline" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={() => { setExpanded(false); setPostText(''); }}>Cancel</button>
-                <button className="btn-primary" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={handlePost} disabled={!postText.trim() || posting}>{posting ? 'Posting…' : 'Post'}</button>
+                <button className="btn-outline" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={() => { setExpanded(false); setPostText(''); setImageFile(null); setVideoFile(null); setShowImageInput(false); setShowVideoInput(false); }}>Cancel</button>
+                <button className="btn-primary" style={{ padding: '0.35rem 0.875rem', fontSize: '0.8rem' }} onClick={handlePost} disabled={(!postText.trim() && !imageFile && !videoFile) || posting}>{posting ? 'Posting…' : 'Post'}</button>
               </div>
             </div>
           </div>
@@ -78,8 +98,8 @@ const Feed = () => {
 
         {!expanded && (
           <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '0.75rem', paddingTop: '0.625rem', borderTop: '1px solid var(--border-default)' }}>
-            {[{ Icon: ImageIcon, color: 'var(--color-info-text)', label: 'Media' }, { Icon: Calendar, color: '#f97316', label: 'Event' }, { Icon: Newspaper, color: '#ef4444', label: 'Write article' }].map(({ Icon, color, label }) => (
-              <button key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.75rem', borderRadius: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+            {[{ Icon: ImageIcon, color: 'var(--color-info-text)', label: 'Photo', action: () => { setExpanded(true); setShowImageInput(true); } }, { Icon: VideoIcon, color: '#8b5cf6', label: 'Video', action: () => { setExpanded(true); setShowVideoInput(true); } }, { Icon: Calendar, color: '#f97316', label: 'Event', action: () => setExpanded(true) }].map(({ Icon, color, label, action }) => (
+              <button key={label} onClick={action} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', padding: '0.5rem 0.75rem', borderRadius: '8px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 <Icon style={{ width: 18, height: 18, color }} /><span className="hidden sm:block">{label}</span>
               </button>
             ))}
@@ -176,6 +196,7 @@ const PostCard = ({ post, delay }: any) => {
       </div>
 
       {post.imageUrl && <div style={{ borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)', maxHeight: 400, overflow: 'hidden' }}><img src={post.imageUrl} alt="post" style={{ width: '100%', objectFit: 'cover' }} /></div>}
+      {post.videoUrl && <div style={{ borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)', maxHeight: 400, overflow: 'hidden', display: 'flex', justifyContent: 'center', background: '#000' }}><video src={post.videoUrl} controls style={{ maxWidth: '100%', maxHeight: 400 }} /></div>}
 
       <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer' }}>

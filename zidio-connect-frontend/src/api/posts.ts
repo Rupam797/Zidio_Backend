@@ -14,3 +14,11 @@ export const deletePost = (id: string | number) => axiosInstance.delete(`/posts/
 export const getComments = (postId: string | number) => axiosInstance.get(`/posts/${postId}/comments`).then(r => r.data);
 
 export const addComment = (postId: string | number, data: any) => axiosInstance.post(`/posts/${postId}/comments`, data).then(r => r.data);
+
+export const uploadPostMedia = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return axiosInstance.post('/posts/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then(r => r.data);
+};

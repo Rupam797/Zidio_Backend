@@ -30,6 +30,13 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionService.acceptRequest(id, principal.getName()));
     }
 
+    // Decline a connection request
+    @DeleteMapping("/{id}/decline")
+    public ResponseEntity<Void> declineRequest(@PathVariable Long id, Principal principal) {
+        connectionService.declineRequest(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
     // Get pending requests for the current user
     @GetMapping("/pending")
     public ResponseEntity<List<Connection>> getPending(Principal principal) {
@@ -40,5 +47,11 @@ public class ConnectionController {
     @GetMapping
     public ResponseEntity<List<Connection>> getMyConnections(Principal principal) {
         return ResponseEntity.ok(connectionService.getMyConnections(principal.getName()));
+    }
+
+    // Get suggestions
+    @GetMapping("/suggestions")
+    public ResponseEntity<List<Map<String, String>>> getSuggestions(Principal principal) {
+        return ResponseEntity.ok(connectionService.getSuggestions(principal.getName()));
     }
 }

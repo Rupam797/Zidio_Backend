@@ -20,6 +20,8 @@ public class Post {
 
     private String imageUrl;
 
+    private String videoUrl;
+
     @Column(nullable = false)
     private String authorEmail;
 
@@ -46,6 +48,9 @@ public class Post {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getVideoUrl() { return videoUrl; }
+    public void setVideoUrl(String videoUrl) { this.videoUrl = videoUrl; }
 
     public String getAuthorEmail() { return authorEmail; }
     public void setAuthorEmail(String authorEmail) { this.authorEmail = authorEmail; }
