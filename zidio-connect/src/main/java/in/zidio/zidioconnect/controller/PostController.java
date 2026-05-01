@@ -67,10 +67,13 @@ public class PostController {
         }
     }
 
-    // PUT like/unlike a post
+    // PUT like/unlike a post with specific reaction type
     @PutMapping("/{id}/like")
-    public ResponseEntity<PostResponseDTO> likePost(@PathVariable Long id, Principal principal) {
-        return ResponseEntity.ok(postService.likePost(id, principal.getName()));
+    public ResponseEntity<PostResponseDTO> likePost(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "LIKE") String type,
+            Principal principal) {
+        return ResponseEntity.ok(postService.likePost(id, principal.getName(), type));
     }
 
     // DELETE a post

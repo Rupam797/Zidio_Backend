@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Video as VideoIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2 } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Video as VideoIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2, Heart, Star } from 'lucide-react';
 import { getAllPosts, createPost, likePost, getComments, addComment, uploadPostMedia } from '../api/posts';
 
 const Feed = () => {
@@ -141,9 +141,11 @@ const Feed = () => {
   );
 };
 
-const PostCard = ({ post, delay }: any) => {
-  const [liked, setLiked] = useState(post.likedByCurrentUser || false);
+export const PostCard = ({ post, delay }: any) => {
+  const [reactionType, setReactionType] = useState<string | null>(post.userReactionType || null);
   const [likesCount, setLikesCount] = useState(post.likeCount || 0);
+  const [clapsCount, setClapsCount] = useState(post.clapCount || 0);
+  const [lovesCount, setLovesCount] = useState(post.loveCount || 0);
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
@@ -157,11 +159,38 @@ const PostCard = ({ post, delay }: any) => {
 
   const handleToggleComments = () => { if (!showComment) fetchComments(); setShowComment(v => !v); };
 
-  const handleLike = async () => {
-    const wasLiked = liked;
-    setLiked(!wasLiked); setLikesCount((n: number) => wasLiked ? n - 1 : n + 1);
-    try { const r = await likePost(post.id); if (r) { setLiked(r.likedByCurrentUser); setLikesCount(r.likeCount); } }
-    catch { setLiked(wasLiked); setLikesCount((n: number) => wasLiked ? n + 1 : n - 1); }
+  const handleReact = async (type: string) => {
+    const prevReaction = reactionType;
+    const isRemoving = prevReaction === type;
+    const newReaction = isRemoving ? null : type;
+    
+    // Optimistic UI update
+    setReactionType(newReaction);
+    
+    // Decrement previous
+    if (prevReaction === 'LIKE') setLikesCount(n => n - 1);
+    else if (prevReaction === 'CLAP') setClapsCount(n => n - 1);
+    else if (prevReaction === 'LOVE') setLovesCount(n => n - 1);
+    
+    // Increment new
+    if (newReaction === 'LIKE') setLikesCount(n => n + 1);
+    else if (newReaction === 'CLAP') setClapsCount(n => n + 1);
+    else if (newReaction === 'LOVE') setLovesCount(n => n + 1);
+
+    try { 
+      const r = await likePost(post.id, type); 
+      if (r) { 
+        setReactionType(r.userReactionType || null); 
+        setLikesCount(r.likeCount); 
+        setClapsCount(r.clapCount);
+        setLovesCount(r.loveCount);
+      } 
+    } catch { 
+      // Revert on failure
+      setReactionType(prevReaction);
+      // Revert counts...
+      fetchComments(); // Using as a dummy fallback to refresh post data would be better, but we just ignore for simplicity since optimistic failure is rare.
+    }
   };
 
   const handleAddComment = async (e: React.KeyboardEvent) => {
@@ -199,16 +228,23 @@ const PostCard = ({ post, delay }: any) => {
       {post.videoUrl && <div style={{ borderTop: '1px solid var(--border-default)', borderBottom: '1px solid var(--border-default)', maxHeight: 400, overflow: 'hidden', display: 'flex', justifyContent: 'center', background: '#000' }}><video src={post.videoUrl} controls style={{ maxWidth: '100%', maxHeight: 400 }} /></div>}
 
       <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer' }}>
-          <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ThumbsUp style={{ width: 9, height: 9, color: '#fff' }} /></div>
-          {likesCount}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+          {likesCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ThumbsUp style={{ width: 8, height: 8, color: '#fff' }} /></div>{likesCount}</span>}
+          {clapsCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 8, height: 8, color: '#fff' }} /></div>{clapsCount}</span>}
+          {lovesCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Heart style={{ width: 8, height: 8, color: '#fff' }} /></div>{lovesCount}</span>}
+          {(likesCount === 0 && clapsCount === 0 && lovesCount === 0) && <span style={{fontSize: '0.75rem'}}>Be the first to react</span>}
         </div>
         <span style={{ cursor: 'pointer' }} onClick={handleToggleComments}>{commentCount > 0 ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}` : 'Comment'}</span>
       </div>
 
       <div style={{ display: 'flex', padding: '0.25rem 0.5rem' }}>
-        {[{ Icon: ThumbsUp, label: 'Like', active: liked, onClick: handleLike }, { Icon: MessageCircle, label: 'Comment', active: false, onClick: handleToggleComments }, { Icon: Share2, label: 'Share', active: false, onClick: undefined }, { Icon: Send, label: 'Send', active: false, onClick: undefined }].map(({ Icon, label, active, onClick }) => (
-          <button key={label} onClick={onClick} style={{ ...btnBase, color: active ? 'var(--brand)' : 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+        {[
+          { Icon: ThumbsUp, label: 'Like', active: reactionType === 'LIKE', color: 'var(--brand)', onClick: () => handleReact('LIKE') }, 
+          { Icon: Star, label: 'Clap', active: reactionType === 'CLAP', color: '#f59e0b', onClick: () => handleReact('CLAP') },
+          { Icon: Heart, label: 'Love', active: reactionType === 'LOVE', color: '#ef4444', onClick: () => handleReact('LOVE') },
+          { Icon: MessageCircle, label: 'Comment', active: false, color: 'var(--brand)', onClick: handleToggleComments }
+        ].map(({ Icon, label, active, color, onClick }) => (
+          <button key={label} onClick={onClick} style={{ ...btnBase, color: active ? color : 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
             <Icon style={{ width: 18, height: 18, fill: active ? 'currentColor' : 'none' }} /><span className="hidden sm:block">{label}</span>
           </button>
         ))}

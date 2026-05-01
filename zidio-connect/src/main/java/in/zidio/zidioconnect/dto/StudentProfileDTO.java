@@ -17,6 +17,7 @@ public class StudentProfileDTO {
     private String bio;
     private String linkedinUrl;
     private String githubUrl;
+    private String portfolioUrl;
     private String experience;
 
     // Getters and Setters
@@ -55,6 +56,9 @@ public class StudentProfileDTO {
 
     public String getGithubUrl() { return githubUrl; }
     public void setGithubUrl(String githubUrl) { this.githubUrl = githubUrl; }
+
+    public String getPortfolioUrl() { return portfolioUrl; }
+    public void setPortfolioUrl(String portfolioUrl) { this.portfolioUrl = portfolioUrl; }
 
     public String getExperience() { return experience; }
     public void setExperience(String experience) { this.experience = experience; }

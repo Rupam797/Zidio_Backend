@@ -7,7 +7,7 @@ export const getMyPosts = () => axiosInstance.get('/posts/mine').then(r => r.dat
 
 export const createPost = (data: any) => axiosInstance.post('/posts', data).then(r => r.data);
 
-export const likePost = (id: string | number) => axiosInstance.put(`/posts/${id}/like`).then(r => r.data);
+export const likePost = (id: string | number, type: string = 'LIKE') => axiosInstance.put(`/posts/${id}/like?type=${type}`).then(r => r.data);
 
 export const deletePost = (id: string | number) => axiosInstance.delete(`/posts/${id}`).then(r => r.data);
 

@@ -3,31 +3,43 @@ import Header from '../components/Header';
 import axiosInstance from '../api/axios';
 import { updateProfile, uploadProfilePicture, uploadResume } from '../api/profile';
 import { getDashboardStats } from '../api/jobs';
-import { Camera, Edit2, FileText, Globe, Code, Briefcase, Book, ExternalLink, Save, X } from 'lucide-react';
+import { getMyPosts } from '../api/posts';
+import { PostCard } from '../components/Feed';
+import { Camera, Edit2, FileText, Globe, Code, Briefcase, Book, ExternalLink, Save, X, Users, CheckCircle } from 'lucide-react';
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [role, setRole] = useState('STUDENT');
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<any>({ name: '', skills: '', companyName: '', bio: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', experience: '' });
+  const [editForm, setEditForm] = useState<any>({ name: '', skills: '', companyName: '', bio: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', portfolioUrl: '', experience: '' });
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
+  const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+
   const fetchProfile = async () => {
+    setLoading(true);
     try {
       const r = await axiosInstance.get('/student/profile');
       setProfile(r.data); setRole('STUDENT');
-      setEditForm({ name: r.data.name || '', skills: r.data.skills || '', bio: r.data.bio || '', phone: r.data.phone || '', college: r.data.college || '', branch: r.data.branch || '', yearOfPassing: r.data.yearOfPassing || '', linkedinUrl: r.data.linkedinUrl || '', githubUrl: r.data.githubUrl || '', experience: r.data.experience || '', companyName: '' });
+      setEditForm({ name: r.data.name || '', skills: r.data.skills || '', bio: r.data.bio || '', phone: r.data.phone || '', college: r.data.college || '', branch: r.data.branch || '', yearOfPassing: r.data.yearOfPassing || '', linkedinUrl: r.data.linkedinUrl || '', githubUrl: r.data.githubUrl || '', portfolioUrl: r.data.portfolioUrl || '', experience: r.data.experience || '', companyName: '' });
       try { setStats(await getDashboardStats()); } catch {}
     } catch {
       try {
         const r = await axiosInstance.get('/recruiter/profile');
         setProfile(r.data); setRole('RECRUITER');
-        setEditForm({ name: r.data.name || '', companyName: r.data.companyName || '', bio: r.data.bio || '', skills: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', experience: '' });
+        setEditForm({ name: r.data.name || '', companyName: r.data.companyName || '', bio: r.data.bio || '', skills: '', phone: '', college: '', branch: '', yearOfPassing: '', linkedinUrl: '', githubUrl: '', portfolioUrl: '', experience: '' });
       } catch (e) { console.error(e); }
     } finally { setLoading(false); }
+
+    setLoadingPosts(true);
+    try {
+      const posts = await getMyPosts();
+      setMyPosts(posts);
+    } catch (e) { console.error(e); } finally { setLoadingPosts(false); }
   };
 
   useEffect(() => { fetchProfile(); }, []);
@@ -59,7 +71,7 @@ const Profile = () => {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)', transition: 'background 0.3s ease' }}>
       <Header />
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '1.5rem 1rem 3rem' }}>
+      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '1.5rem 1rem 3rem' }}>
         {loading ? (
           <div className="card" style={{ overflow: 'hidden' }}>
             <div className="skeleton" style={{ height: 160, borderRadius: 0 }} />
@@ -70,8 +82,9 @@ const Profile = () => {
             </div>
           </div>
         ) : (
-          <div className="animate-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Main profile card */}
+          <div className="animate-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            
+            {/* Main profile card (Hero) */}
             <div className="card" style={{ overflow: 'hidden' }}>
               {/* Banner */}
               <div className="profile-banner" style={{ height: 160, position: 'relative' }} />
@@ -79,22 +92,22 @@ const Profile = () => {
               {/* Avatar + Info */}
               <div style={{ padding: '0 1.5rem 1.5rem', marginTop: '-48px' }}>
                 {/* Avatar */}
-                <div style={{ position: 'relative', width: 96, display: 'inline-block', marginBottom: '1rem' }}>
-                  <div style={{ width: 96, height: 96, borderRadius: '50%', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', background: 'var(--bg-badge)', position: 'relative' }}>
+                <div style={{ position: 'relative', width: 110, display: 'inline-block', marginBottom: '1rem' }}>
+                  <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', background: 'var(--bg-badge)', position: 'relative' }}>
                     {profile?.profilePictureUrl ? (
                       <img src={profile.profilePictureUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--brand-dim)', color: 'var(--brand)', fontSize: '1.75rem', fontWeight: 800 }}>{initials}</div>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--brand-dim)', color: 'var(--brand)', fontSize: '2rem', fontWeight: 800 }}>{initials}</div>
                     )}
                     <label style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: '50%', color: '#fff' }} className="avatar-overlay">
-                      <Camera style={{ width: 20, height: 20 }} />
+                      <Camera style={{ width: 22, height: 22 }} />
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e, 'picture')} />
                     </label>
                   </div>
                 </div>
 
                 {isEditing ? (
-                  <form onSubmit={handleUpdate} style={{ maxWidth: 560 }}>
+                  <form onSubmit={handleUpdate} style={{ maxWidth: 600 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                       <div>
                         {fieldLabel('Full Name *')}
@@ -123,17 +136,18 @@ const Profile = () => {
                           <div>{fieldLabel('College')}<input className="input-field" placeholder="College/University" value={editForm.college} onChange={e => setEditForm({ ...editForm, college: e.target.value })} /></div>
                           <div>{fieldLabel('Branch')}<input className="input-field" placeholder="e.g. Computer Science" value={editForm.branch} onChange={e => setEditForm({ ...editForm, branch: e.target.value })} /></div>
                           <div>{fieldLabel('Year of Passing')}<input className="input-field" placeholder="e.g. 2025" value={editForm.yearOfPassing} onChange={e => setEditForm({ ...editForm, yearOfPassing: e.target.value })} /></div>
-                          <div>{fieldLabel('Skills')}<input className="input-field" placeholder="e.g. React, Java, Python" value={editForm.skills} onChange={e => setEditForm({ ...editForm, skills: e.target.value })} /></div>
+                          <div>{fieldLabel('Skills (Comma separated)')}<input className="input-field" placeholder="e.g. React, Java, Python" value={editForm.skills} onChange={e => setEditForm({ ...editForm, skills: e.target.value })} /></div>
                           <div>{fieldLabel('LinkedIn URL')}<input className="input-field" placeholder="https://linkedin.com/in/…" value={editForm.linkedinUrl} onChange={e => setEditForm({ ...editForm, linkedinUrl: e.target.value })} /></div>
                           <div>{fieldLabel('GitHub URL')}<input className="input-field" placeholder="https://github.com/…" value={editForm.githubUrl} onChange={e => setEditForm({ ...editForm, githubUrl: e.target.value })} /></div>
+                          <div>{fieldLabel('Portfolio URL')}<input className="input-field" placeholder="https://yourportfolio.com" value={editForm.portfolioUrl} onChange={e => setEditForm({ ...editForm, portfolioUrl: e.target.value })} /></div>
                         </div>
                         <div style={{ marginBottom: '1rem' }}>
                           {fieldLabel('Experience')}
-                          <textarea className="input-field" rows={3} placeholder="Prior internships, projects, or relevant experience…" value={editForm.experience} onChange={e => setEditForm({ ...editForm, experience: e.target.value })} style={{ resize: 'vertical' }} />
+                          <textarea className="input-field" rows={4} placeholder="Prior internships, projects, or relevant experience…" value={editForm.experience} onChange={e => setEditForm({ ...editForm, experience: e.target.value })} style={{ resize: 'vertical' }} />
                         </div>
                       </>
                     )}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
                       <button type="submit" className="btn-primary" disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                         <Save style={{ width: 15, height: 15 }} />{saving ? 'Saving…' : 'Save Changes'}
                       </button>
@@ -146,66 +160,65 @@ const Profile = () => {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>{profile?.name}</h1>
+                        <h1 style={{ margin: '0 0 0.375rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                          {profile?.name}
+                        </h1>
 
-                        {/* Role badge */}
-                        <span style={{ display: 'inline-block', background: role === 'STUDENT' ? 'var(--brand-dim)' : role === 'RECRUITER' ? 'var(--color-info-bg)' : 'var(--color-warn-bg)', color: role === 'STUDENT' ? 'var(--brand)' : role === 'RECRUITER' ? 'var(--color-info-text)' : 'var(--color-warn-text)', fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.6rem', borderRadius: '999px', marginBottom: '0.625rem' }}>
-                          {role}
-                        </span>
+                        {/* Role & Connections Badge */}
+                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', background: role === 'STUDENT' ? 'var(--brand-dim)' : role === 'RECRUITER' ? 'var(--color-info-bg)' : 'var(--color-warn-bg)', color: role === 'STUDENT' ? 'var(--brand)' : role === 'RECRUITER' ? 'var(--color-info-text)' : 'var(--color-warn-text)', fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
+                            {role}
+                          </span>
+                          
+                          {role === 'STUDENT' && stats?.connections !== undefined && (
+                            <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#7c3aed', display: 'flex', alignItems: 'center', gap: '0.375rem', background: '#f3e8ff', padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
+                              <Users style={{ width: 13, height: 13 }} />
+                              {stats.connections} Connections
+                            </span>
+                          )}
+                        </div>
 
-                        {profile?.bio && <p style={{ margin: '0.375rem 0 0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 520 }}>{profile.bio}</p>}
+                        {profile?.bio && <p style={{ margin: '0.5rem 0 0.875rem', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: 600 }}>{profile.bio}</p>}
 
-                        {/* Skills */}
-                        {role === 'STUDENT' && profile?.skills && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', marginBottom: '0.75rem' }}>
-                            {profile.skills.split(',').map((skill: string, i: number) => (
-                              <span key={i} className="skill-tag">{skill.trim()}</span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Company */}
+                        {/* Company (Recruiter) */}
                         {role === 'RECRUITER' && profile?.companyName && (
-                          <p style={{ margin: '0 0 0.625rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.9rem' }}>
-                            <Briefcase style={{ width: 15, height: 15 }} />{profile.companyName}
+                          <p style={{ margin: '0 0 0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.95rem' }}>
+                            <Briefcase style={{ width: 16, height: 16 }} />{profile.companyName}
                           </p>
                         )}
 
                         {/* Meta info */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.875rem', fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                           <span>{profile?.email}</span>
-                          {role === 'STUDENT' && profile?.college && <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Book style={{ width: 13, height: 13 }} />{profile.college}{profile.branch ? ` · ${profile.branch}` : ''}</span>}
+                          {role === 'STUDENT' && profile?.college && <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Book style={{ width: 14, height: 14 }} />{profile.college}{profile.branch ? ` · ${profile.branch}` : ''}</span>}
                           {role === 'STUDENT' && profile?.yearOfPassing && <span>Batch {profile.yearOfPassing}</span>}
                           {profile?.phone && <span>{profile.phone}</span>}
                         </div>
 
                         {/* Links */}
-                        {role === 'STUDENT' && (profile?.linkedinUrl || profile?.githubUrl) && (
-                          <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
+                        {role === 'STUDENT' && (profile?.linkedinUrl || profile?.githubUrl || profile?.portfolioUrl) && (
+                          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
                             {profile.linkedinUrl && (
-                              <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.825rem', fontWeight: 600, color: 'var(--color-info-text)', textDecoration: 'none' }}>
+                              <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-info-text)', textDecoration: 'none' }}>
                                 <Globe style={{ width: 14, height: 14 }} />LinkedIn<ExternalLink style={{ width: 11, height: 11 }} />
                               </a>
                             )}
                             {profile.githubUrl && (
-                              <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}>
+                              <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}>
                                 <Code style={{ width: 14, height: 14 }} />GitHub<ExternalLink style={{ width: 11, height: 11 }} />
                               </a>
                             )}
-                          </div>
-                        )}
-
-                        {/* Experience */}
-                        {role === 'STUDENT' && profile?.experience && (
-                          <div style={{ marginTop: '0.75rem', padding: '0.875rem 1rem', background: 'var(--bg-page)', borderRadius: '10px', border: '1px solid var(--border-default)', maxWidth: 520 }}>
-                            <p style={{ margin: '0 0 0.375rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Experience</p>
-                            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line', lineHeight: 1.65 }}>{profile.experience}</p>
+                            {profile.portfolioUrl && (
+                              <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>
+                                <Globe style={{ width: 14, height: 14 }} />Portfolio<ExternalLink style={{ width: 11, height: 11 }} />
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>
 
                       {/* Action buttons */}
-                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0, marginTop: '0.5rem' }}>
                         <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                           <Edit2 style={{ width: 14, height: 14 }} />Edit Profile
                         </button>
@@ -227,30 +240,115 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.875rem' }}>
-              {role === 'STUDENT' && stats ? (
-                <>
-                  {[
-                    { value: stats.totalApplications, label: 'Applications',  color: 'var(--brand)' },
-                    { value: stats.shortlisted,       label: 'Shortlisted',   color: 'var(--color-success-text)' },
-                    { value: stats.savedJobs,         label: 'Saved Jobs',    color: 'var(--color-info-text)' },
-                    { value: stats.connections,       label: 'Connections',   color: '#7c3aed' },
-                  ].map(s => (
-                    <div key={s.label} className="stat-card">
-                      <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-                      <div className="stat-label">{s.label}</div>
+            {/* Two-Column Details Layout */}
+            {!isEditing && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Left Sidebar (About) */}
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                  
+                  {/* Skills Section */}
+                  {role === 'STUDENT' && profile?.skills && (
+                    <div className="card" style={{ padding: '1.25rem' }}>
+                      <h3 style={{ margin: '0 0 1rem', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Top Skills</h3>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        {profile.skills.split(',').map((skill: string, i: number) => {
+                          const s = skill.trim();
+                          if (!s) return null;
+                          return (
+                            <span key={i} style={{ 
+                              display: 'inline-flex', alignItems: 'center', gap: '0.375rem', 
+                              padding: '0.375rem 0.75rem', background: 'var(--bg-badge)', 
+                              color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 600, 
+                              borderRadius: '8px', border: '1px solid var(--border-default)', 
+                              transition: 'all 0.2s', cursor: 'default'
+                            }} 
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.color = 'var(--brand)'; }} 
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-primary)'; }}>
+                              <CheckCircle style={{ width: 14, height: 14, color: 'var(--brand)' }} />
+                              {s}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ))}
-                </>
-              ) : (
-                <>
-                  {['Connections', 'Applications', 'Profile Views'].map(l => (
-                    <div key={l} className="stat-card"><div className="stat-value">—</div><div className="stat-label">{l}</div></div>
-                  ))}
-                </>
-              )}
-            </div>
+                  )}
+
+                  {/* Experience Section */}
+                  {role === 'STUDENT' && profile?.experience && (
+                    <div className="card" style={{ padding: '1.25rem' }}>
+                      <h3 style={{ margin: '0 0 1rem', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Experience</h3>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line', lineHeight: 1.65 }}>
+                        {profile.experience}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Dashboard Stats (Student) */}
+                  {role === 'STUDENT' && stats && (
+                    <div className="card" style={{ padding: '1.25rem' }}>
+                      <h3 style={{ margin: '0 0 1rem', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Dashboard Overview</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {[
+                          { value: stats.totalApplications, label: 'Applications Sent', color: 'var(--brand)' },
+                          { value: stats.shortlisted, label: 'Shortlisted By Recruiters', color: 'var(--color-success-text)' },
+                          { value: stats.savedJobs, label: 'Saved Jobs', color: 'var(--color-info-text)' }
+                        ].map(s => (
+                          <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.625rem 0.75rem', background: 'var(--bg-badge)', borderRadius: '8px' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{s.label}</span>
+                            <span style={{ fontSize: '1rem', fontWeight: 700, color: s.color }}>{s.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recruiter Stats Fallback */}
+                  {role === 'RECRUITER' && (
+                    <div className="card" style={{ padding: '1.25rem' }}>
+                      <h3 style={{ margin: '0 0 1rem', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Overview</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {['Connections', 'Active Job Posts', 'Profile Views'].map(l => (
+                          <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.625rem 0.75rem', background: 'var(--bg-badge)', borderRadius: '8px' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{l}</span>
+                            <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-muted)' }}>—</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Main Area (Activity / Posts) */}
+                <div className="lg:col-span-2 flex flex-col gap-5">
+                  <div className="card" style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Activity & Postings</h3>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, background: 'var(--bg-badge)', padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
+                      {myPosts.length} Post{myPosts.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {loadingPosts ? (
+                      <div className="card" style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div className="animate-spin" style={{ width: 24, height: 24, border: '3px solid var(--border-default)', borderTopColor: 'var(--brand)', borderRadius: '50%', margin: '0 auto 1rem' }} />
+                        Loading your posts...
+                      </div>
+                    ) : myPosts.length === 0 ? (
+                      <div className="card" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+                        <p style={{ margin: '0 0 1rem', color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>You haven't posted anything yet.</p>
+                        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem' }}>Share your thoughts, projects, or achievements with your network!</p>
+                      </div>
+                    ) : (
+                      myPosts.map((post, i) => (
+                        <PostCard key={post.id} post={post} delay={i < 5 ? i * 0.1 : 0} />
+                      ))
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            )}
           </div>
         )}
       </main>

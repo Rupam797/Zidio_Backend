@@ -22,6 +22,9 @@ public class PostLike {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(nullable = false)
+    private String reactionType = "LIKE";
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -34,4 +37,7 @@ public class PostLike {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getReactionType() { return reactionType; }
+    public void setReactionType(String reactionType) { this.reactionType = reactionType; }
 }

@@ -76,37 +76,59 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDTO likePost(Long postId, String userEmail) {
+    public PostResponseDTO likePost(Long postId, String userEmail, String reactionType) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 
-        boolean alreadyLiked = postLikeRepository.existsByPostIdAndUserEmail(postId, userEmail);
+        java.util.Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUserEmail(postId, userEmail);
 
-        if (alreadyLiked) {
-            // Unlike
-            postLikeRepository.deleteByPostIdAndUserEmail(postId, userEmail);
-            post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+        if (existingLike.isPresent()) {
+            PostLike like = existingLike.get();
+            if (like.getReactionType().equals(reactionType)) {
+                // Unlike (toggle off)
+                postLikeRepository.delete(like);
+                decrementCount(post, like.getReactionType());
+            } else {
+                // Change reaction
+                decrementCount(post, like.getReactionType());
+                like.setReactionType(reactionType);
+                postLikeRepository.save(like);
+                incrementCount(post, reactionType);
+            }
         } else {
-            // Like
+            // New reaction
             PostLike like = new PostLike();
             like.setPostId(postId);
             like.setUserEmail(userEmail);
+            like.setReactionType(reactionType);
             postLikeRepository.save(like);
-            post.setLikeCount(post.getLikeCount() + 1);
+            incrementCount(post, reactionType);
 
-            // Notify post author (only on like, not unlike, and not self-like)
+            // Notify post author
             if (!post.getAuthorEmail().equals(userEmail)) {
                 String likerName = resolveUserName(userEmail);
                 notificationService.createNotification(
                     post.getAuthorEmail(),
-                    likerName + " liked your post",
-                    "POST_LIKE"
+                    likerName + " reacted to your post",
+                    "POST_REACTION"
                 );
             }
         }
 
         Post saved = postRepository.save(post);
         return toDTO(saved, userEmail);
+    }
+
+    private void incrementCount(Post post, String type) {
+        if ("LIKE".equals(type)) post.setLikeCount(post.getLikeCount() + 1);
+        else if ("CLAP".equals(type)) post.setClapCount(post.getClapCount() + 1);
+        else if ("LOVE".equals(type)) post.setLoveCount(post.getLoveCount() + 1);
+    }
+
+    private void decrementCount(Post post, String type) {
+        if ("LIKE".equals(type)) post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+        else if ("CLAP".equals(type)) post.setClapCount(Math.max(0, post.getClapCount() - 1));
+        else if ("LOVE".equals(type)) post.setLoveCount(Math.max(0, post.getLoveCount() - 1));
     }
 
     @Transactional
@@ -132,10 +154,18 @@ public class PostService {
         dto.setCreatedAt(post.getCreatedAt());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setLikeCount(post.getLikeCount());
+        dto.setClapCount(post.getClapCount());
+        dto.setLoveCount(post.getLoveCount());
         dto.setCommentCount(commentRepository.countByPostId(post.getId()));
-        dto.setLikedByCurrentUser(
-            currentUserEmail != null && postLikeRepository.existsByPostIdAndUserEmail(post.getId(), currentUserEmail)
-        );
+        
+        if (currentUserEmail != null) {
+            postLikeRepository.findByPostIdAndUserEmail(post.getId(), currentUserEmail)
+                .ifPresent(like -> {
+                    dto.setLikedByCurrentUser(true);
+                    dto.setUserReactionType(like.getReactionType());
+                });
+        }
+        
         dto.setTimeAgo(formatTimeAgo(post.getCreatedAt()));
         return dto;
     }

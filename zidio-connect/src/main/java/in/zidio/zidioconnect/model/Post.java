@@ -33,6 +33,8 @@ public class Post {
     private LocalDateTime updatedAt;
 
     private int likeCount = 0;
+    private int clapCount = 0;
+    private int loveCount = 0;
 
     @PreUpdate
     protected void onUpdate() {
@@ -66,4 +68,10 @@ public class Post {
 
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
+
+    public int getClapCount() { return clapCount; }
+    public void setClapCount(int clapCount) { this.clapCount = clapCount; }
+
+    public int getLoveCount() { return loveCount; }
+    public void setLoveCount(int loveCount) { this.loveCount = loveCount; }
 }

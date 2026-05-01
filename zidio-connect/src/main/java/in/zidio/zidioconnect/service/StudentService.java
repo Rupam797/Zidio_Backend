@@ -46,6 +46,7 @@ public class StudentService {
         if (dto.getBio() != null) s.setBio(dto.getBio());
         if (dto.getLinkedinUrl() != null) s.setLinkedinUrl(dto.getLinkedinUrl());
         if (dto.getGithubUrl() != null) s.setGithubUrl(dto.getGithubUrl());
+        if (dto.getPortfolioUrl() != null) s.setPortfolioUrl(dto.getPortfolioUrl());
         if (dto.getExperience() != null) s.setExperience(dto.getExperience());
 
         studentRepo.save(s);
@@ -84,6 +85,7 @@ public class StudentService {
         dto.setBio(s.getBio());
         dto.setLinkedinUrl(s.getLinkedinUrl());
         dto.setGithubUrl(s.getGithubUrl());
+        dto.setPortfolioUrl(s.getPortfolioUrl());
         dto.setExperience(s.getExperience());
         return dto;
     }

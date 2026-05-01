@@ -13,8 +13,11 @@ public class PostResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private int likeCount;
+    private int clapCount;
+    private int loveCount;
     private long commentCount;
     private boolean likedByCurrentUser;
+    private String userReactionType;
     private String timeAgo;
 
     // Getters and Setters
@@ -50,6 +53,15 @@ public class PostResponseDTO {
 
     public boolean isLikedByCurrentUser() { return likedByCurrentUser; }
     public void setLikedByCurrentUser(boolean likedByCurrentUser) { this.likedByCurrentUser = likedByCurrentUser; }
+
+    public String getUserReactionType() { return userReactionType; }
+    public void setUserReactionType(String userReactionType) { this.userReactionType = userReactionType; }
+
+    public int getClapCount() { return clapCount; }
+    public void setClapCount(int clapCount) { this.clapCount = clapCount; }
+
+    public int getLoveCount() { return loveCount; }
+    public void setLoveCount(int loveCount) { this.loveCount = loveCount; }
 
     public String getTimeAgo() { return timeAgo; }
     public void setTimeAgo(String timeAgo) { this.timeAgo = timeAgo; }
