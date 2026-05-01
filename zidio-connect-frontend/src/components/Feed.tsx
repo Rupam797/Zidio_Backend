@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Video as VideoIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2, Heart, Star } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Share2, Send, Image as ImageIcon, Video as VideoIcon, Calendar, Newspaper, MoreHorizontal, Globe, Loader2, Heart, Star, HeartHandshake, Lightbulb, Smile } from 'lucide-react';
 import { getAllPosts, createPost, likePost, getComments, addComment, uploadPostMedia } from '../api/posts';
 
 const Feed = () => {
@@ -146,7 +146,11 @@ export const PostCard = ({ post, delay }: any) => {
   const [likesCount, setLikesCount] = useState(post.likeCount || 0);
   const [clapsCount, setClapsCount] = useState(post.clapCount || 0);
   const [lovesCount, setLovesCount] = useState(post.loveCount || 0);
+  const [supportCount, setSupportCount] = useState(post.supportCount || 0);
+  const [insightfulCount, setInsightfulCount] = useState(post.insightfulCount || 0);
+  const [funnyCount, setFunnyCount] = useState(post.funnyCount || 0);
   const [showComment, setShowComment] = useState(false);
+  const [showReactions, setShowReactions] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [newComment, setNewComment] = useState('');
@@ -171,11 +175,17 @@ export const PostCard = ({ post, delay }: any) => {
     if (prevReaction === 'LIKE') setLikesCount(n => n - 1);
     else if (prevReaction === 'CLAP') setClapsCount(n => n - 1);
     else if (prevReaction === 'LOVE') setLovesCount(n => n - 1);
+    else if (prevReaction === 'SUPPORT') setSupportCount(n => n - 1);
+    else if (prevReaction === 'INSIGHTFUL') setInsightfulCount(n => n - 1);
+    else if (prevReaction === 'FUNNY') setFunnyCount(n => n - 1);
     
     // Increment new
     if (newReaction === 'LIKE') setLikesCount(n => n + 1);
     else if (newReaction === 'CLAP') setClapsCount(n => n + 1);
     else if (newReaction === 'LOVE') setLovesCount(n => n + 1);
+    else if (newReaction === 'SUPPORT') setSupportCount(n => n + 1);
+    else if (newReaction === 'INSIGHTFUL') setInsightfulCount(n => n + 1);
+    else if (newReaction === 'FUNNY') setFunnyCount(n => n + 1);
 
     try { 
       const r = await likePost(post.id, type); 
@@ -184,6 +194,9 @@ export const PostCard = ({ post, delay }: any) => {
         setLikesCount(r.likeCount); 
         setClapsCount(r.clapCount);
         setLovesCount(r.loveCount);
+        setSupportCount(r.supportCount);
+        setInsightfulCount(r.insightfulCount);
+        setFunnyCount(r.funnyCount);
       } 
     } catch { 
       // Revert on failure
@@ -230,24 +243,84 @@ export const PostCard = ({ post, delay }: any) => {
       <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
           {likesCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ThumbsUp style={{ width: 8, height: 8, color: '#fff' }} /></div>{likesCount}</span>}
-          {clapsCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 8, height: 8, color: '#fff' }} /></div>{clapsCount}</span>}
+          {clapsCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#65a30d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 8, height: 8, color: '#fff' }} /></div>{clapsCount}</span>}
           {lovesCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Heart style={{ width: 8, height: 8, color: '#fff' }} /></div>{lovesCount}</span>}
-          {(likesCount === 0 && clapsCount === 0 && lovesCount === 0) && <span style={{fontSize: '0.75rem'}}>Be the first to react</span>}
+          {supportCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HeartHandshake style={{ width: 8, height: 8, color: '#fff' }} /></div>{supportCount}</span>}
+          {insightfulCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Lightbulb style={{ width: 8, height: 8, color: '#fff' }} /></div>{insightfulCount}</span>}
+          {funnyCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><div style={{ width: 14, height: 14, borderRadius: '50%', background: '#06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Smile style={{ width: 8, height: 8, color: '#fff' }} /></div>{funnyCount}</span>}
+          {(likesCount === 0 && clapsCount === 0 && lovesCount === 0 && supportCount === 0 && insightfulCount === 0 && funnyCount === 0) && <span style={{fontSize: '0.75rem'}}>Be the first to react</span>}
         </div>
         <span style={{ cursor: 'pointer' }} onClick={handleToggleComments}>{commentCount > 0 ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}` : 'Comment'}</span>
       </div>
 
-      <div style={{ display: 'flex', padding: '0.25rem 0.5rem' }}>
-        {[
-          { Icon: ThumbsUp, label: 'Like', active: reactionType === 'LIKE', color: 'var(--brand)', onClick: () => handleReact('LIKE') }, 
-          { Icon: Star, label: 'Clap', active: reactionType === 'CLAP', color: '#f59e0b', onClick: () => handleReact('CLAP') },
-          { Icon: Heart, label: 'Love', active: reactionType === 'LOVE', color: '#ef4444', onClick: () => handleReact('LOVE') },
-          { Icon: MessageCircle, label: 'Comment', active: false, color: 'var(--brand)', onClick: handleToggleComments }
-        ].map(({ Icon, label, active, color, onClick }) => (
-          <button key={label} onClick={onClick} style={{ ...btnBase, color: active ? color : 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <Icon style={{ width: 18, height: 18, fill: active ? 'currentColor' : 'none' }} /><span className="hidden sm:block">{label}</span>
+      <div style={{ display: 'flex', padding: '0.25rem 0.5rem', position: 'relative' }}>
+        
+        {/* React Button with Hover Popover */}
+        <div 
+          style={{ flex: 1, position: 'relative', display: 'flex' }}
+          onMouseEnter={() => setShowReactions(true)}
+          onMouseLeave={() => setShowReactions(false)}
+        >
+          {showReactions && (
+            <div className="animate-fadeInUp" style={{
+              position: 'absolute', bottom: '100%', left: '0',
+              marginBottom: '0.5rem', background: 'var(--bg-card)', border: '1px solid var(--border-default)',
+              borderRadius: '30px', padding: '0.25rem 0.5rem', display: 'flex', gap: '0.5rem',
+              boxShadow: 'var(--shadow-md)', zIndex: 10
+            }}>
+              <button onClick={() => { handleReact('LIKE'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ThumbsUp style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+              <button onClick={() => { handleReact('CLAP'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#65a30d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Star style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+              <button onClick={() => { handleReact('LOVE'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Heart style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+              <button onClick={() => { handleReact('SUPPORT'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><HeartHandshake style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+              <button onClick={() => { handleReact('INSIGHTFUL'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Lightbulb style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+              <button onClick={() => { handleReact('FUNNY'); setShowReactions(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.3rem', borderRadius: '50%', transition: 'transform 0.15s' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Smile style={{ width: 16, height: 16, color: '#fff' }} /></div>
+              </button>
+            </div>
+          )}
+
+          <button 
+            onClick={() => handleReact(reactionType || 'LIKE')} 
+            style={{ ...btnBase, color: reactionType === 'LIKE' ? 'var(--brand)' : reactionType === 'CLAP' ? '#65a30d' : reactionType === 'LOVE' ? '#ef4444' : reactionType === 'SUPPORT' ? '#a855f7' : reactionType === 'INSIGHTFUL' ? '#f59e0b' : reactionType === 'FUNNY' ? '#06b6d4' : 'var(--text-secondary)' }} 
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} 
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            {reactionType === 'LOVE' ? <Heart style={{ width: 18, height: 18, fill: 'currentColor' }} /> :
+             reactionType === 'CLAP' ? <Star style={{ width: 18, height: 18, fill: 'currentColor' }} /> :
+             reactionType === 'SUPPORT' ? <HeartHandshake style={{ width: 18, height: 18, fill: 'currentColor' }} /> :
+             reactionType === 'INSIGHTFUL' ? <Lightbulb style={{ width: 18, height: 18, fill: 'currentColor' }} /> :
+             reactionType === 'FUNNY' ? <Smile style={{ width: 18, height: 18, fill: 'currentColor' }} /> :
+             <ThumbsUp style={{ width: 18, height: 18, fill: reactionType === 'LIKE' ? 'currentColor' : 'none' }} />}
+            <span className="hidden sm:block">
+              {reactionType === 'LOVE' ? 'Love' : 
+               reactionType === 'CLAP' ? 'Celebrate' : 
+               reactionType === 'SUPPORT' ? 'Support' : 
+               reactionType === 'INSIGHTFUL' ? 'Insightful' : 
+               reactionType === 'FUNNY' ? 'Funny' : 
+               reactionType === 'LIKE' ? 'Like' : 'React'}
+            </span>
           </button>
-        ))}
+        </div>
+
+        {/* Comment Button */}
+        <button onClick={handleToggleComments} style={{ ...btnBase, color: 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+          <MessageCircle style={{ width: 18, height: 18, fill: 'none' }} /><span className="hidden sm:block">Comment</span>
+        </button>
+
+        {/* Share Button */}
+        <button style={{ ...btnBase, color: 'var(--text-secondary)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-badge)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+          <Share2 style={{ width: 18, height: 18, fill: 'none' }} /><span className="hidden sm:block">Share</span>
+        </button>
       </div>
 
       {showComment && (

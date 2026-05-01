@@ -15,6 +15,9 @@ public class PostResponseDTO {
     private int likeCount;
     private int clapCount;
     private int loveCount;
+    private int supportCount;
+    private int insightfulCount;
+    private int funnyCount;
     private long commentCount;
     private boolean likedByCurrentUser;
     private String userReactionType;
@@ -62,6 +65,15 @@ public class PostResponseDTO {
 
     public int getLoveCount() { return loveCount; }
     public void setLoveCount(int loveCount) { this.loveCount = loveCount; }
+
+    public int getSupportCount() { return supportCount; }
+    public void setSupportCount(int supportCount) { this.supportCount = supportCount; }
+
+    public int getInsightfulCount() { return insightfulCount; }
+    public void setInsightfulCount(int insightfulCount) { this.insightfulCount = insightfulCount; }
+
+    public int getFunnyCount() { return funnyCount; }
+    public void setFunnyCount(int funnyCount) { this.funnyCount = funnyCount; }
 
     public String getTimeAgo() { return timeAgo; }
     public void setTimeAgo(String timeAgo) { this.timeAgo = timeAgo; }

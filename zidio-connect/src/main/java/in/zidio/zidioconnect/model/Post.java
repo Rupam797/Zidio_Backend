@@ -35,6 +35,9 @@ public class Post {
     private int likeCount = 0;
     private int clapCount = 0;
     private int loveCount = 0;
+    private int supportCount = 0;
+    private int insightfulCount = 0;
+    private int funnyCount = 0;
 
     @PreUpdate
     protected void onUpdate() {
@@ -74,4 +77,13 @@ public class Post {
 
     public int getLoveCount() { return loveCount; }
     public void setLoveCount(int loveCount) { this.loveCount = loveCount; }
+
+    public int getSupportCount() { return supportCount; }
+    public void setSupportCount(int supportCount) { this.supportCount = supportCount; }
+
+    public int getInsightfulCount() { return insightfulCount; }
+    public void setInsightfulCount(int insightfulCount) { this.insightfulCount = insightfulCount; }
+
+    public int getFunnyCount() { return funnyCount; }
+    public void setFunnyCount(int funnyCount) { this.funnyCount = funnyCount; }
 }

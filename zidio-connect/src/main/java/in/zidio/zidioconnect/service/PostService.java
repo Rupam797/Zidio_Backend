@@ -123,12 +123,18 @@ public class PostService {
         if ("LIKE".equals(type)) post.setLikeCount(post.getLikeCount() + 1);
         else if ("CLAP".equals(type)) post.setClapCount(post.getClapCount() + 1);
         else if ("LOVE".equals(type)) post.setLoveCount(post.getLoveCount() + 1);
+        else if ("SUPPORT".equals(type)) post.setSupportCount(post.getSupportCount() + 1);
+        else if ("INSIGHTFUL".equals(type)) post.setInsightfulCount(post.getInsightfulCount() + 1);
+        else if ("FUNNY".equals(type)) post.setFunnyCount(post.getFunnyCount() + 1);
     }
 
     private void decrementCount(Post post, String type) {
         if ("LIKE".equals(type)) post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
         else if ("CLAP".equals(type)) post.setClapCount(Math.max(0, post.getClapCount() - 1));
         else if ("LOVE".equals(type)) post.setLoveCount(Math.max(0, post.getLoveCount() - 1));
+        else if ("SUPPORT".equals(type)) post.setSupportCount(Math.max(0, post.getSupportCount() - 1));
+        else if ("INSIGHTFUL".equals(type)) post.setInsightfulCount(Math.max(0, post.getInsightfulCount() - 1));
+        else if ("FUNNY".equals(type)) post.setFunnyCount(Math.max(0, post.getFunnyCount() - 1));
     }
 
     @Transactional
@@ -156,6 +162,9 @@ public class PostService {
         dto.setLikeCount(post.getLikeCount());
         dto.setClapCount(post.getClapCount());
         dto.setLoveCount(post.getLoveCount());
+        dto.setSupportCount(post.getSupportCount());
+        dto.setInsightfulCount(post.getInsightfulCount());
+        dto.setFunnyCount(post.getFunnyCount());
         dto.setCommentCount(commentRepository.countByPostId(post.getId()));
         
         if (currentUserEmail != null) {
