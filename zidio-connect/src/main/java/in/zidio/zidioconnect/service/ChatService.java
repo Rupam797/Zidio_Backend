@@ -11,10 +11,12 @@ import in.zidio.zidioconnect.repository.StudentRepository;
 import in.zidio.zidioconnect.repository.RecruiterRepository;
 import in.zidio.zidioconnect.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
 
 @Service
 public class ChatService {
@@ -113,11 +115,20 @@ public class ChatService {
      * Get conversation list for the current user with last message preview & unread count.
      */
     public List<Map<String, Object>> getConversationList(String email) {
-        List<String> partners = chatRepo.findChatPartners(email);
+        // Combine emails sent-to and received-from, deduplicated
+        List<String> sentTo = chatRepo.findEmailsSentTo(email);
+        List<String> receivedFrom = chatRepo.findEmailsReceivedFrom(email);
+        Set<String> partnerSet = new java.util.LinkedHashSet<>();
+        partnerSet.addAll(sentTo);
+        partnerSet.addAll(receivedFrom);
+
         List<Map<String, Object>> conversations = new ArrayList<>();
 
-        for (String partnerEmail : partners) {
-            ChatMessage lastMsg = chatRepo.findLastMessage(email, partnerEmail);
+        for (String partnerEmail : partnerSet) {
+            List<ChatMessage> lastMsgList = chatRepo.findLastMessageList(
+                email, partnerEmail, PageRequest.of(0, 1)
+            );
+            ChatMessage lastMsg = lastMsgList.isEmpty() ? null : lastMsgList.get(0);
             long unread = chatRepo.countUnread(partnerEmail, email);
             Map<String, String> profileInfo = getProfileInfo(partnerEmail);
 
