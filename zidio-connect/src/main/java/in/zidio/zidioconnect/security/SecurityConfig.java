@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()       // Optional public job listings
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/student/jobs", "/api/student/jobs/{id}").permitAll() // Allow all roles to view jobs
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/ws/**").permitAll()               // WebSocket handshake
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/recruiter/**").hasRole("RECRUITER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

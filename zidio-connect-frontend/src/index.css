@@ -1291,12 +1291,322 @@ select.input-field {
 }
 
 /* ============================================================
+   MOBILE RESPONSIVE SYSTEM — Production Level
+   Breakpoints: xs<480 | sm<640 | md<768 | lg<1024 | xl<1280
+   ============================================================ */
+
+/* ── Bottom Mobile Nav Bar ── */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  /* Show bottom nav on mobile */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-default);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0 0.25rem;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -2px 20px rgba(0,0,0,0.08);
+  }
+
+  .mobile-bottom-nav a,
+  .mobile-bottom-nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0.5rem 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.15s;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-nav a.active,
+  .mobile-bottom-nav a:hover,
+  .mobile-bottom-nav button:hover {
+    color: var(--brand);
+  }
+
+  /* Add bottom padding so content doesn't hide behind bottom nav */
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Hide desktop nav items on mobile — show only icons */
+  .nav-item span {
+    display: none !important;
+  }
+
+  /* Header search: expand to full on mobile */
+  .header-search {
+    display: none !important;
+  }
+
+  /* Header: compact on mobile */
+  .header-root .flex {
+    gap: 0.5rem;
+  }
+
+  /* Home layout: single column on mobile */
+  .home-layout {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 0.75rem 1rem !important;
+  }
+
+  /* Sidebars hidden on mobile */
+  .sidebar-left,
+  .sidebar-right {
+    display: none !important;
+  }
+
+  /* Feed takes full width */
+  .feed-column {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Cards get slightly less padding */
+  .card {
+    border-radius: 10px;
+  }
+
+  /* Auth pages: single column */
+  .auth-split {
+    flex-direction: column !important;
+  }
+
+  .auth-left-panel {
+    display: none !important;
+  }
+
+  .auth-card {
+    padding: 1.5rem 1.25rem !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  /* Jobs page: stack columns */
+  .jobs-layout {
+    flex-direction: column !important;
+  }
+
+  /* Profile stats: 2-col grid on mobile */
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Admin: hide sidebar on mobile */
+  .admin-sidebar {
+    display: none !important;
+  }
+
+  /* Connections page: 1 column */
+  .connections-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Chat: full screen on mobile — handled by JS mobileView state */
+  .chat-layout {
+    height: calc(100vh - 56px - 56px) !important;
+  }
+
+  /* Touch targets: min 44px */
+  button, a, input, textarea, select {
+    min-height: 36px;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    min-height: 40px;
+  }
+
+  /* Post action buttons: icon-only on mobile */
+  .post-action-btn span {
+    display: none;
+  }
+
+  /* Notification page: full width cards */
+  .notif-layout {
+    padding: 0.75rem !important;
+  }
+
+  /* Search results: full width */
+  .search-results-popover {
+    width: calc(100vw - 1.5rem) !important;
+    left: 0 !important;
+  }
+}
+
+/* ── Tablet (md) overrides ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home-layout {
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+
+  /* Hide right sidebar on tablet */
+  .sidebar-right {
+    display: none !important;
+  }
+
+  /* Feed + left sidebar only */
+  .sidebar-left {
+    width: 200px !important;
+    flex-shrink: 0;
+  }
+
+  .feed-column {
+    max-width: 100% !important;
+    flex: 1 !important;
+  }
+
+  /* Chat: narrower list panel */
+  .chat-list-panel {
+    width: 260px !important;
+  }
+
+  /* Jobs: narrower filter panel */
+  .jobs-filter-panel {
+    width: 220px !important;
+  }
+}
+
+/* ── Small mobile (xs) ── */
+@media (max-width: 479px) {
+  .header-root div[style*="maxWidth"] {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .auth-card {
+    padding: 1.25rem 1rem !important;
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+
+  /* Post card images: taller on small screens */
+  .post-image-container {
+    max-height: 280px !important;
+  }
+
+  /* Mobile: full-width buttons */
+  .mobile-full-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── Mobile search overlay ── */
+.mobile-search-overlay {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-search-overlay {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg-page);
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .mobile-search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: var(--bg-badge);
+    border: 1.5px solid var(--brand);
+    border-radius: var(--radius-full);
+    padding: 0.5rem 1rem;
+  }
+
+  .mobile-search-input-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+  }
+}
+
+/* ── Scrolling improvements on touch ── */
+@media (hover: none) and (pointer: coarse) {
+  /* Smooth momentum scrolling on iOS */
+  .chat-messages-area,
+  .conversation-list,
+  .feed-column,
+  [style*="overflow-y: auto"],
+  [style*="overflowY: auto"] {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Remove hover effects that don't make sense on touch */
+  .card:hover {
+    transform: none;
+  }
+
+  .btn-primary:hover:not(:disabled),
+  .btn-outline:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ── Safe area insets (iPhone notch / dynamic island) ── */
+@supports (padding: max(0px)) {
+  .header-root {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  }
+}
+
+/* ── Focus visible for accessibility ── */
+*:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ── Image loading performance ── */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================================
    PRINT
    ============================================================ */
 @media print {
 
   .header-root,
-  .nav-item {
+  .nav-item,
+  .mobile-bottom-nav {
     display: none;
   }
 
@@ -1308,5 +1618,6 @@ select.input-field {
   body {
     background: white;
     color: black;
+    padding-bottom: 0;
   }
 }

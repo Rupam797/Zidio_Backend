@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search, Home, Users, Briefcase, Bell, User,
   LogOut, ChevronDown, Moon, Sun, FileText, Settings, Shield,
-  X, Loader2, GraduationCap, Building2
+  X, Loader2, GraduationCap, Building2, MessageSquare
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { globalSearch, SearchResult } from '../api/search';
@@ -129,6 +129,7 @@ const Header = () => {
     { to: '/', icon: Home, label: 'Home' },
     { to: '/network', icon: Users, label: 'Network' },
     { to: '/jobs', icon: Briefcase, label: 'Jobs' },
+    { to: '/chat', icon: MessageSquare, label: 'Messages' },
     ...(role === 'STUDENT' ? [{ to: '/applications', icon: FileText, label: 'Applied' }] : []),
     { to: '/notifications', icon: Bell, label: 'Alerts' },
   ];

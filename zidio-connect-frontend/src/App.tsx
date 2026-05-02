@@ -9,6 +9,7 @@ import Applications from './pages/Applications';
 import AdminDashboard from './pages/AdminDashboard';
 import Connections from './pages/Connections';
 import Notifications from './pages/Notifications';
+import Chat from './pages/Chat';
 import { Toaster } from 'react-hot-toast';
 
 const RequireAuth = ({ children }) => {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
         <Route path="/network" element={<RequireAuth><Connections /></RequireAuth>} />
         <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
+        <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
         
         {/* Admin Route */}
         <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />

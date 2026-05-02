@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
+import { useNavigate } from 'react-router-dom';
 import { getPendingRequests, getMyConnections, acceptConnectionRequest, declineConnectionRequest } from '../api/connections';
-import { UserCheck, UserPlus, Users, MessageSquare, Check, X } from 'lucide-react';
+import { UserPlus, Users, MessageSquare, Check, X } from 'lucide-react';
 
 const Connections = () => {
   const [pending, setPending] = useState<any[]>([]);
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -117,7 +119,10 @@ const Connections = () => {
                           {otherName !== otherUser && <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherUser}</p>}
                           <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 500 }}>Connected</p>
                         </div>
-                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.375rem', borderRadius: '6px', display: 'flex', transition: 'background 0.15s, color 0.15s' }}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/chat?user=${encodeURIComponent(otherUser)}`); }}
+                          title="Send message"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.375rem', borderRadius: '6px', display: 'flex', transition: 'background 0.15s, color 0.15s' }}
                           onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-badge)'; e.currentTarget.style.color = 'var(--color-info-text)'; }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-muted)'; }}>
                           <MessageSquare style={{ width: 16, height: 16 }} />
