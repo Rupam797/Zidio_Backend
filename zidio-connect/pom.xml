@@ -56,6 +56,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- WebSocket for real-time chat -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<!-- DevTools (Optional) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

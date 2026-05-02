@@ -37,16 +37,16 @@ public class ConnectionController {
         return ResponseEntity.noContent().build();
     }
 
-    // Get pending requests for the current user
+    // Get pending requests for the current user (enriched with profile info)
     @GetMapping("/pending")
-    public ResponseEntity<List<Connection>> getPending(Principal principal) {
-        return ResponseEntity.ok(connectionService.getPendingRequests(principal.getName()));
+    public ResponseEntity<List<Map<String, Object>>> getPending(Principal principal) {
+        return ResponseEntity.ok(connectionService.getPendingRequestsEnriched(principal.getName()));
     }
 
-    // Get all my connections
+    // Get all my connections (enriched with profile info)
     @GetMapping
-    public ResponseEntity<List<Connection>> getMyConnections(Principal principal) {
-        return ResponseEntity.ok(connectionService.getMyConnections(principal.getName()));
+    public ResponseEntity<List<Map<String, Object>>> getMyConnections(Principal principal) {
+        return ResponseEntity.ok(connectionService.getMyConnectionsEnriched(principal.getName()));
     }
 
     // Get suggestions

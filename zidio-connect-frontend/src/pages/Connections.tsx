@@ -53,14 +53,21 @@ const Connections = () => {
                   <span style={{ background: 'var(--brand)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.1rem 0.45rem', borderRadius: '999px' }}>{pending.length}</span>
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {pending.map((req: any) => (
+                  {pending.map((req: any) => {
+                    const senderName = req.senderName || req.senderEmail;
+                    const senderPic = req.senderProfilePic;
+                    const senderInitial = senderName.charAt(0).toUpperCase();
+                    return (
                     <div key={req.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem', border: '1px solid var(--border-default)', borderRadius: '10px', gap: '1rem', transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-card-hover)'}
                       onMouseLeave={e => e.currentTarget.style.background = ''}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-                        <div className="avatar avatar-lg avatar-blue" style={{ fontSize: '1.1rem' }}>{req.senderEmail.charAt(0).toUpperCase()}</div>
+                        <div className="avatar avatar-lg avatar-blue" style={{ fontSize: '1.1rem', padding: senderPic ? 0 : undefined, overflow: 'hidden' }}>
+                          {senderPic ? <img src={senderPic} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : senderInitial}
+                        </div>
                         <div>
-                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{req.senderEmail}</p>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{senderName}</p>
+                          {senderName !== req.senderEmail && <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{req.senderEmail}</p>}
                           <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Wants to connect with you</p>
                         </div>
                       </div>
@@ -73,7 +80,8 @@ const Connections = () => {
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -93,15 +101,20 @@ const Connections = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.875rem' }}>
                   {connections.map((c: any) => {
                     const otherUser = c.senderEmail === currentUser ? c.receiverEmail : c.senderEmail;
+                    const otherName = c.otherUserName || otherUser;
+                    const otherPic = c.otherUserProfilePic;
                     const colors = ['avatar-green', 'avatar-blue', 'avatar-amber', 'avatar-red'];
                     const color = colors[otherUser.charCodeAt(0) % colors.length];
                     return (
                       <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem', border: '1px solid var(--border-default)', borderRadius: '10px', transition: 'border-color 0.15s, box-shadow 0.15s', cursor: 'pointer' }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--brand)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)'; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.boxShadow = 'none'; }}>
-                        <div className={`avatar avatar-md ${color}`} style={{ fontSize: '1rem', flexShrink: 0 }}>{otherUser.charAt(0).toUpperCase()}</div>
+                        <div className={`avatar avatar-md ${color}`} style={{ fontSize: '1rem', flexShrink: 0, padding: otherPic ? 0 : undefined, overflow: 'hidden' }}>
+                          {otherPic ? <img src={otherPic} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : otherName.charAt(0).toUpperCase()}
+                        </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherUser}</p>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherName}</p>
+                          {otherName !== otherUser && <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherUser}</p>}
                           <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 500 }}>Connected</p>
                         </div>
                         <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.375rem', borderRadius: '6px', display: 'flex', transition: 'background 0.15s, color 0.15s' }}

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { globalSearch, SearchResult } from '../api/search';
+import axiosInstance from '../api/axios';
 
 const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -22,6 +23,24 @@ const Header = () => {
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!role || role === 'ADMIN') return;
+      try {
+        const endpoint = role === 'RECRUITER' ? '/recruiter/profile' : '/student/profile';
+        const r = await axiosInstance.get(endpoint);
+        if (r.data.profilePictureUrl) setProfilePic(r.data.profilePictureUrl);
+        if (r.data.name) setUserName(r.data.name);
+      } catch (e) {
+        console.error('Failed to fetch profile in header', e);
+      }
+    };
+    fetchProfile();
+  }, [role]);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -115,7 +134,7 @@ const Header = () => {
   ];
 
   const email = localStorage.getItem('email') || '';
-  const initials = email.charAt(0).toUpperCase() || 'U';
+  const initials = userName ? userName.charAt(0).toUpperCase() : (email.charAt(0).toUpperCase() || 'U');
 
   // Group search results by type
   const jobResults = searchResults.filter(r => r.type === 'JOB');
@@ -334,9 +353,9 @@ const Header = () => {
             >
               <div
                 className="avatar avatar-sm avatar-green"
-                style={{ fontSize: '0.8rem' }}
+                style={{ fontSize: '0.8rem', padding: profilePic ? 0 : undefined, overflow: 'hidden' }}
               >
-                {initials}
+                {profilePic ? <img src={profilePic} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
               </div>
               <span className="hidden sm:flex items-center gap-0.5" style={{ fontSize: '0.68rem' }}>
                 Me <ChevronDown style={{ width: 10, height: 10 }} />
@@ -352,9 +371,9 @@ const Header = () => {
                 <div style={{ padding: '0.625rem 0.75rem', marginBottom: '0.25rem' }}>
                   <div
                     className="avatar avatar-lg avatar-green"
-                    style={{ margin: '0 auto 0.5rem', fontSize: '1.25rem' }}
+                    style={{ margin: '0 auto 0.5rem', fontSize: '1.25rem', padding: profilePic ? 0 : undefined, overflow: 'hidden' }}
                   >
-                    {initials}
+                    {profilePic ? <img src={profilePic} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
                   </div>
                   <p style={{
                     fontSize: '0.8rem',
@@ -363,7 +382,7 @@ const Header = () => {
                     textAlign: 'center',
                     marginBottom: '0.125rem',
                   }}>
-                    {email}
+                    {userName || email}
                   </p>
                   <p style={{
                     fontSize: '0.7rem',

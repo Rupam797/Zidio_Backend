@@ -23,6 +23,7 @@ public class RecruiterService {
         Recruiter recruiter = recruiterRepo.findByUserEmail(email);
 
         RecruiterProfileDTO dto = new RecruiterProfileDTO();
+        dto.setName(recruiter.getName() != null ? recruiter.getName() : recruiter.getCompanyName());
         dto.setEmail(recruiter.getUser().getEmail());
         dto.setCompanyName(recruiter.getCompanyName());
         dto.setCompanyWebsite(recruiter.getCompanyWebsite());
@@ -32,6 +33,9 @@ public class RecruiterService {
 
     public String updateProfile(String email, RecruiterProfileDTO dto) {
         Recruiter recruiter = recruiterRepo.findByUserEmail(email);
+        if (dto.getName() != null) {
+            recruiter.setName(dto.getName());
+        }
         recruiter.setCompanyName(dto.getCompanyName());
         recruiter.setCompanyWebsite(dto.getCompanyWebsite());
         recruiterRepo.save(recruiter);

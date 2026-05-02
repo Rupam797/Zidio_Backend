@@ -36,9 +36,9 @@ const Rightbar = () => {
     }
   };
   return (
-    <div style={{ width: 300, flexShrink: 0 }} className="hidden lg:flex flex-col gap-3">
+    <div style={{ width: 300, flexShrink: 0, position: 'sticky', top: 70 }} className="hidden lg:flex flex-col gap-3">
       {/* ── Zidio News ── */}
-      <div className="card" style={{ padding: '1rem', position: 'sticky', top: 72 }}>
+      <div className="card" style={{ padding: '1rem' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -149,7 +149,9 @@ const Rightbar = () => {
             const color = colors[p.email.charCodeAt(0) % colors.length];
             return (
               <div key={p.email} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div className={`avatar avatar-md ${color}`}>{initials}</div>
+                <div className={`avatar avatar-md ${color}`} style={{ padding: p.profilePictureUrl ? 0 : undefined, overflow: 'hidden' }}>
+                  {p.profilePictureUrl ? <img src={p.profilePictureUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     margin: 0,

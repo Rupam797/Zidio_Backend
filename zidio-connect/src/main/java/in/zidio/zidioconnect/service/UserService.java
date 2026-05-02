@@ -87,6 +87,7 @@ public class UserService {
         } else if (user.getRole() == Role.RECRUITER) {
             Recruiter recruiter = new Recruiter();
             recruiter.setUser(user);
+            recruiter.setName(req.getName());
             recruiter.setCompanyName(req.getCompanyName());
             recruiter.setCompanyWebsite(req.getCompanyWebsite());
             recruiterRepo.save(recruiter);
