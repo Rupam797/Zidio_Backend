@@ -42,7 +42,7 @@ public class JobService {
                                                         int page, int size, String currentUserEmail) {
         Page<Job> jobPage = jobRepo.searchJobs(
             keyword == null ? "" : keyword,
-            type == null ? "" : type,
+            type == null || type.isEmpty() ? null : type,
             location == null ? "" : location,
             PageRequest.of(page, size)
         );
