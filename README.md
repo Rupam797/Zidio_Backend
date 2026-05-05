@@ -1,4 +1,4 @@
-# 📡 ZIDIO CONNECT - Backend
+# 📡 ZIDIO CONNECT
 
 ZIDIO CONNECT is a **Job & Internship Management System** built with **Spring Boot** to support a role-based platform for Students, Recruiters, and Admins. This backend exposes a RESTful API powering features like authentication, job posting, application tracking, resume uploads, and more.
 
