@@ -28,6 +28,7 @@ public class RecruiterService {
         dto.setCompanyName(recruiter.getCompanyName());
         dto.setCompanyWebsite(recruiter.getCompanyWebsite());
         dto.setProfilePictureUrl(recruiter.getProfilePictureUrl());
+        dto.setBackgroundPictureUrl(recruiter.getBackgroundPictureUrl());
         return dto;
     }
 
@@ -51,5 +52,16 @@ public class RecruiterService {
         recruiter.setProfilePictureUrl(imageUrl);
         recruiterRepo.save(recruiter);
         return "Profile picture uploaded successfully";
+    }
+
+    public String uploadBackgroundPicture(String email, MultipartFile file) throws IOException {
+        Recruiter recruiter = recruiterRepo.findByUserEmail(email);
+
+        // ✅ Upload to Cloudinary
+        String imageUrl = cloudinaryFileUploader.upload(file);
+
+        recruiter.setBackgroundPictureUrl(imageUrl);
+        recruiterRepo.save(recruiter);
+        return "Background picture uploaded successfully";
     }
 }

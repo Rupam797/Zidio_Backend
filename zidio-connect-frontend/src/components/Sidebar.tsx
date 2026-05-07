@@ -57,7 +57,15 @@ const Sidebar = () => {
     <div className="flex flex-col gap-3 w-full">
       {/* ── Profile Card ── */}
       <div className="card" style={{ overflow: 'hidden' }}>
-        <div className="profile-banner" style={{ height: 64 }} />
+        <div 
+          className="profile-banner" 
+          style={{ 
+            height: 64,
+            backgroundImage: profile?.backgroundPictureUrl ? `url(${profile.backgroundPictureUrl})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }} 
+        />
         <div style={{ padding: '0 1rem 1.125rem', marginTop: '-2.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {/* Avatar */}

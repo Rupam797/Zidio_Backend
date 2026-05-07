@@ -71,6 +71,15 @@ public class StudentService {
         return "Profile picture uploaded successfully";
     }
 
+    @Transactional
+    public String uploadBackgroundPictureForLoggedInUser(MultipartFile file) throws IOException {
+        Student student = getLoggedInStudent();
+        String imageUrl = cloudinaryFileUploader.upload(file);
+        student.setBackgroundPictureUrl(imageUrl);
+        studentRepo.save(student);
+        return "Background picture uploaded successfully";
+    }
+
     private StudentProfileDTO toDTO(Student s) {
         StudentProfileDTO dto = new StudentProfileDTO();
         dto.setName(s.getName());
@@ -81,6 +90,7 @@ public class StudentService {
         dto.setYearOfPassing(s.getYearOfPassing());
         dto.setResumeUrl(s.getResumeUrl());
         dto.setProfilePictureUrl(s.getProfilePictureUrl());
+        dto.setBackgroundPictureUrl(s.getBackgroundPictureUrl());
         dto.setSkills(s.getSkills());
         dto.setBio(s.getBio());
         dto.setLinkedinUrl(s.getLinkedinUrl());

@@ -39,4 +39,17 @@ public class RecruiterProfileController {
             return ResponseEntity.internalServerError().body("Failed to upload image: " + e.getMessage());
         }
     }
+
+    @PostMapping("/background-picture")
+    public ResponseEntity<String> uploadBackgroundPicture(
+            @RequestParam("file") MultipartFile file,
+            Principal principal
+    ) {
+        try {
+            String message = recruiterService.uploadBackgroundPicture(principal.getName(), file);
+            return ResponseEntity.ok(message);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to upload image: " + e.getMessage());
+        }
+    }
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import axiosInstance from '../api/axios';
-import { updateProfile, uploadProfilePicture, uploadResume } from '../api/profile';
+import { updateProfile, uploadProfilePicture, uploadBackgroundPicture, uploadResume } from '../api/profile';
 import { getDashboardStats } from '../api/jobs';
 import { getMyPosts } from '../api/posts';
 import { PostCard } from '../components/Feed';
@@ -56,6 +56,7 @@ const Profile = () => {
     setUploading(true);
     try {
       if (type === 'resume') await uploadResume(file);
+      else if (type === 'background') await uploadBackgroundPicture(role, file);
       else await uploadProfilePicture(role, file);
       fetchProfile();
     } catch { alert('Upload failed.'); }
@@ -87,19 +88,33 @@ const Profile = () => {
             {/* Main profile card (Hero) */}
             <div className="card" style={{ overflow: 'hidden' }}>
               {/* Banner */}
-              <div className="profile-banner" style={{ height: 160, position: 'relative' }} />
+              <div 
+                className="profile-banner banner-container" 
+                style={{ 
+                  height: 160, 
+                  position: 'relative',
+                  backgroundImage: profile?.backgroundPictureUrl ? `url(${profile.backgroundPictureUrl})` : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }} 
+              >
+                <label className="banner-overlay">
+                  <Camera style={{ width: 16, height: 16 }} /> Edit Header
+                  <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e, 'background')} />
+                </label>
+              </div>
 
               {/* Avatar + Info */}
               <div style={{ padding: '0 1.5rem 1.5rem', marginTop: '-48px' }}>
                 {/* Avatar */}
                 <div style={{ position: 'relative', width: 110, display: 'inline-block', marginBottom: '1rem' }}>
-                  <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', background: 'var(--bg-badge)', position: 'relative' }}>
+                  <div className="avatar-container" style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', background: 'var(--bg-badge)', position: 'relative' }}>
                     {profile?.profilePictureUrl ? (
                       <img src={profile.profilePictureUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--brand-dim)', color: 'var(--brand)', fontSize: '2rem', fontWeight: 800 }}>{initials}</div>
                     )}
-                    <label style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', borderRadius: '50%', color: '#fff' }} className="avatar-overlay">
+                    <label className="avatar-overlay">
                       <Camera style={{ width: 22, height: 22 }} />
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFile(e, 'picture')} />
                     </label>

@@ -460,6 +460,60 @@ select.input-field {
 }
 
 /* ============================================================
+   IMAGE UPLOAD OVERLAYS
+   ============================================================ */
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.banner-container:hover .banner-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+.banner-overlay:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
    SKELETON LOADING
    ============================================================ */
 @keyframes shimmer {

@@ -332,18 +332,6 @@ const Header = () => {
             </Link>
           ))}
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="theme-toggle ml-1"
-            aria-label="Toggle theme"
-            title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
-          >
-            {theme === 'dark'
-              ? <Sun style={{ width: 16, height: 16 }} />
-              : <Moon style={{ width: 16, height: 16 }} />
-            }
-          </button>
 
           {/* Avatar / Me */}
           <div className="relative ml-1" ref={dropdownRef}>
@@ -421,6 +409,18 @@ const Header = () => {
                     Admin Panel
                   </Link>
                 )}
+
+                <button 
+                  className="dropdown-item" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleTheme();
+                  }}
+                >
+                  {theme === 'dark' ? <Sun style={{ width: 15, height: 15 }} /> : <Moon style={{ width: 15, height: 15 }} />}
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </button>
 
                 <div className="dropdown-divider" />
 

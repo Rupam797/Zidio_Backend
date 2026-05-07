@@ -18,7 +18,9 @@ public class Recruiter {
 
     private String companyWebsite;
 
-    private String profilePictureUrl; // ✅ Add this field
+    private String profilePictureUrl;
+
+    private String backgroundPictureUrl;
 
     private String name;
 
@@ -47,4 +49,8 @@ public class Recruiter {
     public String getProfilePictureUrl() { return profilePictureUrl; }
 
     public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+
+    public String getBackgroundPictureUrl() { return backgroundPictureUrl; }
+
+    public void setBackgroundPictureUrl(String backgroundPictureUrl) { this.backgroundPictureUrl = backgroundPictureUrl; }
 }

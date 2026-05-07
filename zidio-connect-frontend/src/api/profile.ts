@@ -28,3 +28,13 @@ export const uploadProfilePicture = async (role, file) => {
   });
   return response.data;
 };
+
+export const uploadBackgroundPicture = async (role, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const endpoint = role === 'Student' || role === 'STUDENT' ? '/student/background-picture' : '/recruiter/background-picture';
+  const response = await axiosInstance.post(endpoint, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};

@@ -18,6 +18,7 @@ public class Student {
 
     private String resumeUrl;
     private String profilePictureUrl;
+    private String backgroundPictureUrl;
 
     @Column(length = 1000)
     private String skills;
@@ -60,6 +61,9 @@ public class Student {
 
     public String getProfilePictureUrl() { return profilePictureUrl; }
     public void setProfilePictureUrl(String profilePictureUrl) { this.profilePictureUrl = profilePictureUrl; }
+
+    public String getBackgroundPictureUrl() { return backgroundPictureUrl; }
+    public void setBackgroundPictureUrl(String backgroundPictureUrl) { this.backgroundPictureUrl = backgroundPictureUrl; }
 
     public String getSkills() { return skills; }
     public void setSkills(String skills) { this.skills = skills; }

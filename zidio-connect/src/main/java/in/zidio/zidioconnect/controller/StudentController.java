@@ -54,6 +54,11 @@ public class StudentController {
         return ResponseEntity.ok(studentService.uploadProfilePictureForLoggedInUser(file));
     }
 
+    @PostMapping("/background-picture")
+    public ResponseEntity<String> uploadBackgroundPicture(@RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(studentService.uploadBackgroundPictureForLoggedInUser(file));
+    }
+
     // ---- Dashboard ----
 
     @GetMapping("/dashboard")
